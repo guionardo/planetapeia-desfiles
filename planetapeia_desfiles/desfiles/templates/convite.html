@@ -1,0 +1,27 @@
+{% extends "base/bootstrap.html" %}
+
+{% block content %}
+<div class="col-lg-8 px-0">
+    <p class="fs-5">Este é um convite para o desfile {{ desfile }}</p>
+    {% if erro %}
+    {{ erro }}
+    {% else %}
+    <p>Por favor, insira seu CPF abaixo para continuarmos.</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="CPF" class="form-label">CPF</label>
+            <input type="text" class="form-control" name="cpf" id="CPF" maxlength="11" minlength="11" pattern="[0-9]{11}"
+                title="Informe seu CPF usando apenas números" aria-describedby="cpfHelp">
+            <div id="cpfHelp" class="form-text">Não vamos compartilhar essa informação com ninguém.</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+
+    <hr class="col-1 my-4">
+
+    <a href="https://getbootstrap.com" class="btn btn-primary">Read the Bootstrap docs</a>
+    <a href="https://github.com/twbs/examples" class="btn btn-secondary">View on GitHub</a>
+    {% endif %}
+</div>
+{% endblock %}

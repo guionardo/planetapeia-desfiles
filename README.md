@@ -40,6 +40,8 @@ class TipoCobrancaTraje {
     SIM
     NÃO
 }
+
+Grupo .. TipoCobrancaTraje
 ```
 
 ### Cadastro de Desfile
@@ -50,7 +52,7 @@ class Desfile {
     + string nome
     + string local
     + date data
-    
+
 }
 class VeiculoDesfile {
     + int id_veiculo    
@@ -60,6 +62,83 @@ class PessoaVeiculo {
 }
 Desfile "1" --> "1..*" VeiculoDesfile: contém
 VeiculoDesfile "1" --> "1..*" PessoaVeiculo: contém
+```
+
+### Cadastro de Traje
+
+```mermaid
+classDiagram
+class Traje {
+    + string nome    
+    + Veiculo veiculo
+}
+
+class TrajeInventario {
+    + int num_inventario
+    + Traje traje
+    + TamanhoTraje tamanho
+    + SituacaoTraje situacao
+}
+
+class SituacaoTraje {
+    <<enumeration>>
+    DISPONIVEL
+    EMPRESTADO
+    MANUTENCAO
+    DESCARTADO
+}
+
+class TrajeHistorico {
+    + TrajeInventario traje
+    + date data
+    + string observacao
+    + TrajeMovimento movimento
+    + User usuario
+    + Pessoa pessoa
+}
+
+class TrajeMovimento {
+    <<enumeration>>
+    ENTRADA
+    EMPRESTIMO
+    DEVOLUCAO
+    MANUTENCAO
+    DESCARTE
+}
+
+class TrajeTaxa {
+    + Desfile desfile
+    + TrajeHistorico traje
+    + decimal valor_taxa
+    + decimal valor_pago
+    + TrajeSituacaoTaxa situacao
+    + date data_pagamento
+    + User usuario    
+}
+
+class TrajeSituacaoTaxa {
+    <<enumeration>>
+    PENDENTE
+    PAGO
+    ABONADO
+}
+
+class TamanhoTraje {
+    <<enumeration>>
+    P
+    M
+    G
+    GG
+}
+
+Traje "1" --> "1..*" TrajeInventario: contém
+TrajeInventario "1" --> "1..*" TrajeHistorico
+TrajeInventario -- SituacaoTraje
+TrajeInventario -- TamanhoTraje
+
+TrajeHistorico -- TrajeMovimento
+TrajeHistorico "1" -- "1..*" TrajeTaxa : empréstimo/devolução
+TrajeTaxa -- TrajeSituacaoTaxa
 ```
 
 ## Fluxos dos Convidados
@@ -95,6 +174,7 @@ class Pessoa {
     + TipoCobrancaTrajePessoa cobrar_taxa_traje
     + bool e_crianca() computado a partir da idade < 12 anos
     + bool cobrar_taxa_traje_efetiva() computado a partir do campo local e do grupo
+    + Pessoa padrinho
 }
 
 class Genero {
@@ -125,5 +205,9 @@ class TipoCobrancaTrajePessoa {
     SEGUIR GRUPO
 }
 
+Pessoa -- Genero
+Pessoa -- TamanhoTraje
+Pessoa -- TipoPessoa
+Pessoa -- TipoCobrancaTrajePessoa
 
 ```

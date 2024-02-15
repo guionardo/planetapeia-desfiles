@@ -20,63 +20,29 @@
                                role="button"
                                data-bs-toggle="dropdown"
                                aria-expanded="false">
-                                <img src="{{ pessoa.get_foto }}"
+                                <img src="{{ navbar.get_foto }}"
                                      alt="mdo"
                                      width="32"
                                      height="32"
                                      class="rounded-circle">
                             </a>
                             <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item disabled" href="#" aria-current="page">{{ pessoa.nome }}</a>
-                                </li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'perfil' %}">Perfil</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">Customers</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">Products</a>
-                                </li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">Reports</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">Analytics</a>
-                                </li>
+                                {% for link in navbar.userlinks %}
+                                    <li>
+                                        {% if link.divider %}
+                                            <hr class="dropdown-divider">
+                                        {% elif link.disabled %}
+                                            <a class="dropdown-item disabled" aria-disabled="true">{{ link.label }}</a>
+                                        {% elif link.active %}
+                                            <a class="dropdown-item active" aria-current="page" href="#">{{ link.label }}</a>
+                                        {% else %}
+                                            <a class="dropdown-item" href="{{ link.to }}">{{ link.label }}</a>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
                             </ul>
                         </li>
                     {% endif %}
-                    {% for link in navbar.links %}
-                        <li class="nav-item">
-                            {% if link.disabled %}
-                                <a class="nav-link disabled" aria-disabled="true">{{ link.label }}</a>
-                            {% elif link.active %}
-                                <a class="nav-link active" aria-current="page" href="#">{{ link.label }}</a>
-                            {% else %}
-                                <a class="nav-link" href="{{ link.link }}">{{ link.label }}</a>
-                            {% endif %}
-                        </li>
-                    {% endfor %}
-                    <!-- <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Another link</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" aria-disabled="true">Link</a>
-                </li> -->
                 </ul>
             </div>
         </div>

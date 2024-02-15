@@ -9,9 +9,8 @@ from django.views.generic import TemplateView
 
 from ..models import Convite, Desfile, Pessoa
 from ..models_utils import cpf_validator
-
-from .utils import NavBar
 from .redirect_crypt import HttpEncryptedRedirectResponse
+from .utils import NavBar
 
 
 class ConviteView(TemplateView):
@@ -33,7 +32,7 @@ class ConviteView(TemplateView):
         hash = kwargs.get("hash")
         convite = None
         context = {
-            "navbar": NavBar().to_html(),
+            "navbar": NavBar(request),
             "title": "Planetapéia - Convite",
             "header": "Convite inválido",
         }

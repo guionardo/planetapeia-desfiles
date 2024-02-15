@@ -29,6 +29,7 @@ class NavBar:
         self.user: User = request.user
         self.pessoa = self.get_pessoa(request)
         self.userlinks = self.get_userlinks()
+        self.is_logged = self.pessoa and self.user.is_active
 
     @property
     def get_foto(self):
@@ -51,6 +52,8 @@ class NavBar:
             return pessoa
 
     def get_userlinks(self) -> list[Link]:
+        if not self.user.is_active:
+            return []
         return [
             Link(self.get_name, disabled=True),
             Link("-"),

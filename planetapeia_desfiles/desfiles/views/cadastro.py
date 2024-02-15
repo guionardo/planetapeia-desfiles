@@ -1,13 +1,14 @@
 from typing import Any
 
+from django.contrib import messages
 from django.http import HttpRequest
 from django.http.response import HttpResponse as HttpResponse
+from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
 from ..models import Grupo, Pessoa
-from .utils.navbar import NavBar
 from .redirect_crypt import HttpEncryptedRedirectResponse
-from django.contrib import messages
+from .utils.navbar import NavBar
 
 
 class CadastroPessoaView(TemplateView):
@@ -24,7 +25,7 @@ class CadastroPessoaView(TemplateView):
 
         context = {
             "cpf": cpf,
-            "navbar": NavBar.get_userlinks(request),
+            "navbar": NavBar(request),
             "header": "Cadastro de Pessoa",
             "grupo": grupo,
             "grupo_id": grupo_id,
@@ -54,6 +55,8 @@ class CadastroPessoaView(TemplateView):
                     request,
                     f"{pessoa.nome} foi registrada com o login {pessoa.cpf} e senha {pessoa.created_password}. Guarde essa informação.",
                 )
+
+            return redirect("login")
 
         except Exception as exc:
             print(exc)

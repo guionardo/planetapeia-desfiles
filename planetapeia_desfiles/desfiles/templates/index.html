@@ -1,12 +1,16 @@
 {% extends "base/bootstrap.html" %}
 {% block content %}
     <div class="col-lg-8 px-0">
-        {% if user %}
-            <p class="fs-5">Você está logado como usuário {{ user }}</p>
+        {% if navbar.is_logged %}
+            <p class="fs-5">Você está logado como usuário {{ navbar.get_name }}</p>
             <p>Clique no link abaixo para visualizar seu painel de operações.</p>
             <hr class="col-6">
             <a class="btn btn-success" href="{% url 'home' %}">Painel</a>
-            <a class="btn btn-secondary" href="{% url 'logoff' %}">Logoff</a>
+        {% else %}
+            <p class="fs-5">Este é o sistema de gerenciamento de desfiles do Planetapéia.</p>
+            <p>Você deve ter um usuário cadastrado ou receber um link de convite para acessar o sistema.</p>
+            <hr class="col-6">
+            <a class="btn btn-success" href="{% url 'login' %}">Login</a>
         {% endif %}
     </div>
 {% endblock content %}

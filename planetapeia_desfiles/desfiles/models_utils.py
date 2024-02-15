@@ -80,6 +80,10 @@ def get_robot_user():
     return robot_user
 
 
-def default_user_password(cpf: str, nome: str, data_nascimento: datetime.date) -> str:
+def default_user_password(
+    cpf: str, nome: str, data_nascimento: datetime.date | str
+) -> str:
+    if isinstance(data_nascimento, str):
+        data_nascimento = datetime.datetime.strptime(data_nascimento, "%Y-%m-%d").date()
     iniciais = "".join(w[0] for w in nome.upper().split(" ") if w)
     return f"{iniciais}{cpf[-4:]}{data_nascimento.year}"

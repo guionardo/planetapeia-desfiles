@@ -1,0 +1,158 @@
+{% extends "base/bootstrap.html" %}
+{% block content %}
+    <div class="col-lg-8 px-0">
+        <form method="post">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <span class="input-group-text">CPF</span>
+                <input type="text"
+                       class="form-control"
+                       name="cpf"
+                       id="CPF"
+                       maxlength="11"
+                       minlength="11"
+                       pattern="[0-9]{11}"
+                       title="Informe seu CPF usando apenas números"
+                       aria-describedby="cpfHelp"
+                       value="{{ cpf }}">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Nome</span>
+                <input type="text"
+                       class="form-control"
+                       name="nome"
+                       id="NOME"
+                       maxlength="60"
+                       minlength="6"
+                       placeholder="Nome completo"
+                       title="Informe seu nome completo"
+                       value="{{ nome }}">
+            </div>
+            <div class="row mb-3">
+                <div class="input-group col">
+                    <span class="input-group-text">Telefone</span>
+                    <input type="text"
+                           class="form-control"
+                           name="telefone"
+                           id="TELEFONE"
+                           maxlength="11"
+                           minlength="8"
+                           pattern="[0-9]{8-11}"
+                           placeholder="Telefone"
+                           title="Informe seu telefone usando apenas números"
+                           value="{{ telefone }}">
+                </div>
+                <div class="input-group col">
+                    <span class="input-group-text">Data de nascimento</span>
+                    <input type="date"
+                           class="form-control"
+                           name="data_nascimento"
+                           id="NASCIMENTO"
+                           maxlength="11"
+                           minlength="8"
+                           pattern="[0-9]{8-11}"
+                           placeholder="Telefone"
+                           title="Informe seu telefone usando apenas números"
+                           value="{{ data_nascimento }}">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="input-group col">
+                    <span class="input-group-text">Gênero</span>
+                    <div class="input-group-text">
+                        <input class="form-check-input" type="radio" name="genero" id="GENERO_M" value="M" {% if genero='M'
+                            %}checked{% endif %}>
+                            &nbsp;
+                            <label class="form-check-label" for="GENERO_M">Masc</label>
+                        </div>
+                        <div class="input-group-text">
+                            <input class="form-check-input" type="radio" name="genero" id="GENERO_F" value="F" {% if genero='F'
+                                %}checked{% endif %}>
+                                &nbsp;
+                                <label class="form-check-label" for="GENERO_F">Fem</label>
+                            </div>
+                        </div>
+                        <div class="input-group col">
+                            <span class="input-group-text">Peso</span>
+                            <input type="number"
+                                   class="form-control"
+                                   name="peso"
+                                   id="PESO"
+                                   min="1"
+                                   max="160"
+                                   title="Informe seu peso em Kg"
+                                   value="{{ peso }}">
+                        </div>
+                        <div class="input-group col">
+                            <span class="input-group-text">Altura</span>
+                            <input type="number"
+                                   class="form-control"
+                                   name="altura"
+                                   id="ALTURA"
+                                   min="30"
+                                   max="220"
+                                   title="Informe sua altura em cm"
+                                   value="{{ altura }}">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="input-group col">
+                            <label class="input-group-text">Tamanho do traje</label>
+                            <select class="form-select" id="TAMANHO_TRAJE" name="tamanho_traje">
+                                <option disabled>Escolha...</option>
+                                <option value="P" {% if tamanho = 'P'}selected
+                                {% endif %}
+                                >Pequeno</option>
+                            <option value="M" {% if tamanho = 'M'}selected
+                            {% endif %}
+                            >Médio</option>
+                        <option value="G" {% if tamanho = 'G'}selected
+                        {% endif %}
+                        >Grande</option>
+                    <option value="E" {% if tamanho = 'E'}selected
+                    {% endif %}
+                    >Extra Grande</option>
+            </select>
+        </div>
+        <div class="input-group col">
+            <div class="input-group-text">
+                <input class="form-check-input" type="checkbox" value="" aria-label="Pessoa com Deficiência"
+                    name="pcd" {% if pcd %}checked{%endif}>
+                </div>
+                <label class="input-group-text">Pessoa com Deficiência</label>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="input-group col">
+                <label class="input-group-text">Foto</label>
+                <input class="form-control"
+                       type="file"
+                       accept="image/*"
+                       name="foto"
+                       id="formFile"
+                       onchange="preview()">
+                <button onclick="clearImage()" class="btn btn-primary">Limpar</button>
+            </div>
+            <img id="frame"
+                 alt="foto"
+                 src=""
+                 max-width="250px"
+                 max-height="250px"
+                 class="img-fluid" />
+        </div>
+        <script>
+            function preview() {
+                frame.src = URL.createObjectURL(event.target.files[0]);
+            }
+            function clearImage() {
+                document.getElementById('formFile').value = null;
+                frame.src = "";
+            }
+        </script>
+        <input type="hidden" name="grupo_id" value="{{ grupo_id }}">
+        <input type="hidden" name="convite" value="{{ convite }}">
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+{% endif %}
+</div>
+{% endblock content %}

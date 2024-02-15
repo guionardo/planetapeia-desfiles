@@ -1,0 +1,33 @@
+{% extends "base/bootstrap.html" %}
+{% block content %}
+    <div class="col-lg-8 px-0">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row mb-3">
+                <div class="input-group mb-3 col">
+                    <span class="input-group-text">{{ label_nome }}</span>
+                    <span class="input-group-text">{{ username }}</span>
+                </div>
+                <div class="input-group mb-3 col">
+                    <span class="input-group-text">Nome</span>
+                    <span class="input-group-text">{{ fullname }}</span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="input-group mb-3 col">
+                    <span class="input-group-text">Senha atual</span>
+                    <input type="password" class="form-control" name="senha_atual" />
+                </div>
+                <div class="input-group mb-3 col">
+                    <span class="input-group-text">Nova senha</span>
+                    <input type="password" class="form-control" name="senha_1" minlength="8" />
+                </div>
+                <div class="input-group mb-3 col">
+                    <span class="input-group-text">Confirmação</span>
+                    <input type="password" class="form-control" name="senha_2" minlength="8" />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+    </div>
+{% endblock content %}

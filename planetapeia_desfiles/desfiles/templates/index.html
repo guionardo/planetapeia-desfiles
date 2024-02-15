@@ -1,0 +1,12 @@
+{% extends "base/bootstrap.html" %}
+{% block content %}
+    <div class="col-lg-8 px-0">
+        {% if user %}
+            <p class="fs-5">Você está logado como usuário {{ user }}</p>
+            <p>Clique no link abaixo para visualizar seu painel de operações.</p>
+            <hr class="col-6">
+            <a class="btn btn-success" href="{% url 'home' %}">Painel</a>
+            <a class="btn btn-secondary" href="{% url 'logoff' %}">Logoff</a>
+        {% endif %}
+    </div>
+{% endblock content %}

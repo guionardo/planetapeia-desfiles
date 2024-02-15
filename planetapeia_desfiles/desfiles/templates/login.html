@@ -1,13 +1,13 @@
 {% extends "base/bootstrap.html" %}
 {% block content %}
     <div class="col-lg-8 px-0">
-        {% if desfile %}
-            <p class="fs-5">Este é um convite para o desfile {{ desfile }}</p>
-            <p>Por favor, insira seu CPF abaixo para continuarmos.</p>
+        {% if erro %}
+            {{ erro }}
+        {% else %}
             <form method="post">
                 {% csrf_token %}
-                <div class="mb-3">
-                    <label for="CPF" class="form-label">CPF</label>
+                <div class="input-group mb-3">
+                    <span class="input-group-text">CPF</span>
                     <input type="text"
                            class="form-control"
                            name="cpf"
@@ -17,11 +17,20 @@
                            pattern="[0-9]{11}"
                            title="Informe seu CPF usando apenas números"
                            aria-describedby="cpfHelp">
-                    <div id="cpfHelp" class="form-text">Não vamos compartilhar essa informação com ninguém.</div>
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Senha</span>
+                    <input type="password"
+                           class="form-control"
+                           name="senha"
+                           id="SENHA"
+                           maxlength="60"
+                           minlength="6"
+                           placeholder="Senha"
+                           title="Informe sua senha">
                 </div>
                 <button type="submit" class="btn btn-primary">Enviar</button>
             </form>
         {% endif %}
-        <hr class="col-1 my-4">
     </div>
 {% endblock content %}

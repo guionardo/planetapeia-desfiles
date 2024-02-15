@@ -1,0 +1,84 @@
+{% if navbar %}
+    <nav class="navbar navbar-expand-lg bg-body-tertiary bg-dark border-bottom border-body" data-bs-theme="dark"">
+        <div class=" container-fluid">
+            <a class="navbar-brand" href="#">Planetapéia</a>
+            <button class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarScroll"
+                    aria-controls="navbarScroll"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarScroll">
+                <ul class="navbar-nav me-auto my-2 my-lg-0">
+                    {% if navbar.userlinks %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle"
+                               href="#"
+                               role="button"
+                               data-bs-toggle="dropdown"
+                               aria-expanded="false">
+                                <img src="{{ pessoa.get_foto }}"
+                                     alt="mdo"
+                                     width="32"
+                                     height="32"
+                                     class="rounded-circle">
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item disabled" href="#" aria-current="page">{{ pessoa.nome }}</a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'perfil' %}">Perfil</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#">Customers</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#">Products</a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#">Reports</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#">Analytics</a>
+                                </li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                    {% for link in navbar.links %}
+                        <li class="nav-item">
+                            {% if link.disabled %}
+                                <a class="nav-link disabled" aria-disabled="true">{{ link.label }}</a>
+                            {% elif link.active %}
+                                <a class="nav-link active" aria-current="page" href="#">{{ link.label }}</a>
+                            {% else %}
+                                <a class="nav-link" href="{{ link.link }}">{{ link.label }}</a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                    <!-- <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Link</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Another link</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" aria-disabled="true">Link</a>
+                </li> -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+{% endif %}

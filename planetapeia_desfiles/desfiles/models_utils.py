@@ -1,8 +1,12 @@
 import datetime
+import logging
 import os
 import struct
 
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+
+robot_user: User = None
 
 
 def cpf_validator(cpf):
@@ -62,3 +66,20 @@ def convite_hash() -> str:
     """Gerar um hash ordenado de 8 caracteres"""
     f = datetime.datetime.timestamp(datetime.datetime.utcnow())
     return hex(struct.unpack("<I", struct.pack("<f", f))[0])[2:].upper()
+
+
+def get_robot_user():
+    global robot_user
+    if robot_user:
+        return robot_user
+    robot_username = "planetapeia"
+    if robot_user := User.objects.filter(username=robot_username).first():
+        return robot_user
+    robot_user = User.objects.create_superuser(username=robot_username)
+    logging.info("Created robot user: %s", robot_user)
+    return robot_user
+
+
+def default_user_password(cpf: str, nome: str, data_nascimento: datetime.date) -> str:
+    iniciais = "".join(w[0] for w in nome.upper().split(" ") if w)
+    return f"{iniciais}{cpf[-4:]}{data_nascimento.year}"

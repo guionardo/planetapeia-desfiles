@@ -1,15 +1,17 @@
-from django.core.exceptions import ValidationError
 import datetime
 import decimal
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.templatetags.static import static
 
 from .models_utils import (
     convite_hash,
     cpf_validator,
     data_nascimento_validator,
+    default_user_password,
     upload_to,
 )
 
@@ -66,6 +68,9 @@ class TrajeSituacaoTaxa(models.TextChoices):
 
 
 class Pessoa(models.Model):
+    is_cleaned = False
+    created_password: str = ""
+
     cpf = models.CharField(
         verbose_name="CPF", primary_key=True, max_length=11, validators=[cpf_validator]
     )
@@ -99,7 +104,10 @@ class Pessoa(models.Model):
     )
     pcd = models.BooleanField(verbose_name="Pessoa com deficiência", default=False)
     tipo = models.CharField(
-        verbose_name="Tipo", max_length=1, choices=TiposPessoasChoices, default=TiposPessoasChoices.CONVIDADO
+        verbose_name="Tipo",
+        max_length=1,
+        choices=TiposPessoasChoices,
+        default=TiposPessoasChoices.CONVIDADO,
     )
     tipo_cobranca_traje = models.CharField(
         verbose_name="Tipo cobrança traje",
@@ -115,6 +123,22 @@ class Pessoa(models.Model):
         null=True,
         blank=True,
     )
+    foto = models.ImageField(
+        verbose_name="Imagem",
+        upload_to=upload_to,
+        help_text="Logotipo para ser usada nos relatórios",
+        null=True,
+        blank=True,
+    )
+
+    def get_foto(self):
+        if self.foto:
+            return self.foto.url
+        return static(
+            "icon_male.svg"
+            if self.genero == GenerosChoices.MASCULINO
+            else "icon_female.svg"
+        )
 
     @property
     def e_crianca(self) -> bool:
@@ -128,6 +152,34 @@ class Pessoa(models.Model):
 
     def __str__(self):
         return self.nome
+
+    def get_user(self) -> User:
+        if user := User.objects.filter(username=self.cpf).first():
+            return user
+        nome, sobrenome = self.nome.split(" ", 1)
+        self.created_password = default_user_password(
+            self.cpf, self.nome, self.data_nascimento
+        )
+        return User.objects.create_user(
+            username=self.cpf,
+            first_name=nome,
+            last_name=sobrenome,
+            password=self.created_password,
+        )
+
+    def clean(self):
+        # Nome completo
+        palavras = [n for n in self.nome.split(" ") if n]
+        if len(palavras) < 2:
+            raise ValidationError("Nome da pessoa deve incluir ao menos um sobrenome")
+        self.is_cleaned = True
+
+    def save(self, *args, **kwargs):
+        if not self.is_cleaned:
+            self.clean()
+
+        super().save(*args, **kwargs)
+        _ = self.get_user()
 
 
 class Veiculo(models.Model):
@@ -170,6 +222,7 @@ class Veiculo(models.Model):
             self.qtd_max_homens = self.capacidade
         if self.qtd_max_mulheres > self.capacidade:
             self.qtd_max_mulheres = self.capacidade
+
         return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
@@ -186,6 +239,8 @@ class Grupo(models.Model):
 
 
 class Desfile(models.Model):
+    is_cleaned = False
+
     nome = models.CharField(verbose_name="Nome", max_length=64)
     local = models.CharField(verbose_name="Local", max_length=64, default="")
     data = models.DateField(verbose_name="Data")
@@ -205,14 +260,20 @@ class Desfile(models.Model):
     def __str__(self) -> str:
         return f"{self.nome} em {self.local}: {self.data:%d/%m/%Y}"
 
-    # def clean(self):
-    #     if self.confirmado and not self.aprovador:
-    #         self.confirmado = False
-    #         raise ValidationError(
-    #             "É necessário informar um aprovador para confirmar o desfile"
-    #         )
+    def clean(self):
+        if not self.veiculos.first():
+            raise ValidationError("É necessário incluir ao menos um veículo no desfile")
+        self.is_cleaned = True
+        # if self.confirmado and not self.aprovador:
+        #     self.confirmado = False
+        #     raise ValidationError(
+        #         "É necessário informar um aprovador para confirmar o desfile"
+        #     )
 
     def save(self, *args, **kwargs) -> None:
+        if not self.is_cleaned:
+            self.clean()
+
         if not self.confirmado:
             self.aprovador = None
             self.data_aprovacao = None
@@ -239,7 +300,10 @@ class InscricaoDesfile(models.Model):
     )
     pessoa = models.ForeignKey(Pessoa, verbose_name="Pessoa", on_delete=models.PROTECT)
     tipo_pessoa = models.CharField(
-        verbose_name="Tipo", max_length=1, choices=TiposPessoasChoices, default=TiposPessoasChoices.CONVIDADO
+        verbose_name="Tipo",
+        max_length=1,
+        choices=TiposPessoasChoices,
+        default=TiposPessoasChoices.CONVIDADO,
     )
     veiculo = models.ForeignKey(
         VeiculoDesfile,
@@ -298,6 +362,86 @@ class InscricaoDesfile(models.Model):
                 aprovacao = "Aprovação pendente"
 
         return f"{self.pessoa} -> {self.desfile} : {aprovacao}"
+
+
+class StaffPadrao(models.Model):
+    is_cleaned = False
+    staff_padrao_veiculo: "StaffPadraoVeiculo" = models.ForeignKey(
+        "StaffPadraoVeiculo", verbose_name="staff padrão", on_delete=models.PROTECT
+    )
+    pessoa: Pessoa = models.OneToOneField(
+        Pessoa, verbose_name="Pessoa", on_delete=models.PROTECT
+    )
+
+    def __str__(self):
+        return f"{self.pessoa} [{self.pessoa.get_tipo_display()}]"
+
+    def clean(self):
+        if self.pessoa.tipo == TiposPessoasChoices.CONVIDADO:
+            raise ValidationError(
+                "Staff padrão não pode ser uma pessoa do tipo convidado"
+            )
+        self.is_cleaned = True
+
+    def save(self, *args, **kwargs) -> None:
+        if not self.is_cleaned:
+            self.clean()
+
+        return super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name_plural = "Staffs padrão"
+        verbose_name = "Staff padrão"
+        unique_together = ("staff_padrao_veiculo", "pessoa")
+
+
+class StaffPadraoVeiculo(models.Model):
+    veiculo: Veiculo = models.OneToOneField(
+        Veiculo,
+        verbose_name="Veículo",
+        primary_key=True,
+        on_delete=models.PROTECT,
+    )
+
+    ultimo_ajuste: datetime = models.DateTimeField(
+        verbose_name="Último ajuste", auto_now=True, editable=False
+    )
+    usuario: User = models.ForeignKey(
+        User, verbose_name="Responsável", on_delete=models.PROTECT
+    )
+
+    pessoas = models.ManyToManyField(StaffPadrao, verbose_name="Pessoas")
+
+    def __str__(self):
+        return f"{self.veiculo}"
+
+    class Meta:
+        verbose_name_plural = "Staffs padrão por veículo"
+        verbose_name = "Staff padrão por veículo"
+
+
+class PessoaStaff(Pessoa):
+    is_cleaned = False
+
+    class Meta:
+        proxy = True
+        verbose_name_plural = "Pessoas staff"
+        verbose_name = "Pessoa staff"
+
+    def clean(self):
+        if self.tipo == TiposPessoasChoices.CONVIDADO:
+            raise ValidationError("Pessoa staff não pode ser do tipo convidado")
+        self.is_cleaned = True
+
+    def save(self, *args, **kwargs) -> None:
+        if not self.is_cleaned:
+            self.clean()
+        return super().save(*args, **kwargs)
+
+    @property
+    def staff_padrao_veiculo(self) -> StaffPadraoVeiculo | None:
+        if padrao := StaffPadrao.objects.filter(pessoa=self).first():
+            return padrao.staff_padrao_veiculo
 
 
 class Traje(models.Model):

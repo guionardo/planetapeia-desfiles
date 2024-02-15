@@ -1,16 +1,16 @@
 from datetime import date
 
+from django.contrib import messages
 from django.forms import ValidationError
 from django.http import HttpRequest
 from django.http.response import HttpResponse
-from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import TemplateView
 
 from ..models import Convite, Desfile, Pessoa
 from ..models_utils import cpf_validator
-from ..navbar import NavBar
-from . import encrypt_dict
+
+from .utils import NavBar
 from .redirect_crypt import HttpEncryptedRedirectResponse
 
 
@@ -29,27 +29,33 @@ class ConviteView(TemplateView):
         else:
             raise Convite.DoesNotExist()
 
-    def get(self, request: HttpRequest, hash: str) -> HttpResponse:
-        erro = None
+    def get(self, request: HttpRequest, **kwargs) -> HttpResponse:
+        hash = kwargs.get("hash")
         convite = None
+        context = {
+            "navbar": NavBar().to_html(),
+            "title": "Planetapéia - Convite",
+            "header": "Convite inválido",
+        }
         try:
-            convite = self._get_convite(hash)
+            if not hash:
+                messages.error(
+                    request,
+                    "Você deve utilizar o link de convite fornecido pelo seu padrinho ou líder de grupo",
+                )
+            else:
+                convite = self._get_convite(hash)
+                context["convite"] = convite
+                context["desfile"] = convite.desfile
+                context["header"] = f"Convite para o desfile {Desfile.objects.first()}"
 
         except Convite.DoesNotExist:
-            erro = "Convite não foi encontrado"
+            messages.error(request, "Convite não foi encontrado")
 
         except Exception as exc:
-            erro = exc.message
-        return self.render_to_response(
-            context={
-                "title": "Planetapéia - Convite",
-                "header": f"Convite para o desfile {Desfile.objects.first()}",
-                "navbar": NavBar().to_html(),
-                "convite": convite,
-                "desfile": Desfile.objects.first(),
-                "erro": erro,
-            },
-        )
+            messages.error(request, str(exc))
+
+        return self.render_to_response(context=context)
 
     def post(self, request: HttpRequest, hash: str) -> HttpResponse:
         erro = None
@@ -78,7 +84,7 @@ class ConviteView(TemplateView):
             context={
                 "title": "Planetapéia - Convite",
                 "header": f"Convite para o desfile {Desfile.objects.first()}",
-                "navbar": NavBar().to_html(),
+                "navbar": {"links": [{"label": "Home", "link": reverse("home")}]},
                 "convite": convite,
                 "desfile": Desfile.objects.first(),
                 "erro": erro,

@@ -1,7 +1,6 @@
-from typing import Any
-
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -14,7 +13,7 @@ from .utils.navbar import NavBar
 class LoginView(TemplateView):
     template_name = "login.html"
 
-    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         context = {
             "navbar": NavBar(request),
             "header": "Login",
@@ -29,8 +28,12 @@ class LoginView(TemplateView):
             return HttpResponseRedirect(reverse("home"))
 
 
+@login_required
 def logoff(request: HttpRequest) -> HttpResponse:
     if request.user:
+        messages.info(
+            request,
+            f"Logoff do usuário {request.user.get_full_name() or request.user.get_username()}",
+        )
         logout(request)
-        messages.info(request, f"Logoff do usuário {request.user}")
     return redirect("index")

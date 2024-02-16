@@ -160,12 +160,11 @@
             </div>
             <div class="row mb-3">
                 {% if readonly %}
-                    <img style="max-height: 250px"
-                         src="{{ pessoa.get_foto }}"
+                    <img src="{{ pessoa.get_foto }}"
                          alt="foto"
-                         class="img-fluid"
-                         max-height="250px"
-                         max-width="250px" />
+                         class="img-fluid img250"
+                         width="250px"
+                         height="auto" />
                 {% else %}
                     <div class="input-group col">
                         <label class="input-group-text">Foto</label>
@@ -179,9 +178,9 @@
                     <img id="previewImg"
                          alt="foto"
                          src=""
-                         class="img-fluid"
-                         max-height="250px"
-                         max-width="250px" />
+                         class="img250"
+                         width="250px"
+                         height="auto" />
                 {% endif %}
             </div>
             <script>
@@ -204,6 +203,7 @@
             <input type="hidden" name="convite" value="{{ convite }}">
             {% if readonly %}
                 <a class="btn btn-success" href="{% url 'perfil_editar' %}">Editar</a>
+                <a class="btn btn-success" href="{% url 'perfil_senha' %}">Alterar senha</a>
             {% else %}
                 <button type="submit" class="btn btn-primary">Enviar</button>
             {% endif %}

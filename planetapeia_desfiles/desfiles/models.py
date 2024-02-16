@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.templatetags.static import static
-
+from .services.face_recognition import get_face_image
 from .models_utils import (
     convite_hash,
     cpf_validator,
@@ -134,7 +134,9 @@ class Pessoa(models.Model):
 
     def get_foto(self):
         if self.foto:
-            return static(os.path.basename(self.foto.url))
+            foto_file = os.path.abspath(f'./{self.foto.url.removeprefix("/")}')
+            url = get_face_image(foto_file)
+            return static(os.path.basename(url))
         return static(
             "icon_male_black.svg"
             if self.genero == GenerosChoices.MASCULINO

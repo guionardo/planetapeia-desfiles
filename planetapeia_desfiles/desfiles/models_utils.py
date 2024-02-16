@@ -43,13 +43,13 @@ def data_nascimento_validator(value):
 
 def upload_to(instance, filename):
     _, ext = os.path.splitext(filename)
-    if instance_id := instance.id:
+    if instance_id := instance.pk:
         ...
     else:
         cls = instance.__class__
         try:
-            if latest := cls.objects.latest("id"):
-                instance_id = latest.id + 1
+            if latest := cls.objects.latest("pk"):
+                instance_id = latest.pk + 1
             else:
                 instance_id = 1
         except cls.DoesNotExist:

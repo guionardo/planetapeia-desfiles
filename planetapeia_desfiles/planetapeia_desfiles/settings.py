@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
+    "django_bootstrap5",
     "desfiles",
 ]
 
@@ -141,6 +142,8 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"  # <-- Updated!
+
+STATICFILES_DIRS = [BASE_DIR / "uploads"]
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 

@@ -5,7 +5,7 @@ from .views.cadastro import CadastroPessoaView
 from .views.convite import ConviteView
 from .views.home import HomeView
 from .views.index import Index
-from .views.perfil import PerfilAlterarSenhaView, PerfilView
+from .views.perfil import PerfilAlterarSenhaView, PerfilEditarView, PerfilView
 
 urlpatterns = [
     path("", Index.as_view(), name="index"),
@@ -13,6 +13,7 @@ urlpatterns = [
     path("login", LoginView.as_view(), name="login"),
     path("logoff", logoff, name="logoff"),
     path("perfil", PerfilView.as_view(), name="perfil"),
+    path("perfil/editar", PerfilEditarView.as_view(), name="perfil_editar"),
     path("perfil/senha", PerfilAlterarSenhaView.as_view(), name="perfil_senha"),
     path("convite", ConviteView.as_view(), name="convite_vazio"),
     path("convite/<str:hash>", ConviteView.as_view(), name="convite"),

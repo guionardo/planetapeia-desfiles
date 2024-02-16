@@ -7,7 +7,14 @@ from django.http.response import HttpResponse
 from django.urls import reverse
 from django.views.generic import TemplateView
 
-from ..models import Convite, Desfile, Pessoa
+from ..models import (
+    AprovacaoChoices,
+    Convite,
+    Desfile,
+    Pessoa,
+    InscricaoDesfile,
+    TiposPessoasChoices,
+)
 from ..models_utils import cpf_validator
 from .redirect_crypt import HttpEncryptedRedirectResponse
 from .utils import NavBar
@@ -44,9 +51,14 @@ class ConviteView(TemplateView):
                 )
             else:
                 convite = self._get_convite(hash)
-                context["convite"] = convite
-                context["desfile"] = convite.desfile
-                context["header"] = f"Convite para o desfile {Desfile.objects.first()}"
+                context.update(
+                    {
+                        "convite": convite,
+                        "desfile": convite.desfile,
+                        "header": f"Convite para o desfile {Desfile.objects.first()}",
+                        "cpf": request.user.username,
+                    }
+                )
 
         except Convite.DoesNotExist:
             messages.error(request, "Convite não foi encontrado")
@@ -57,36 +69,60 @@ class ConviteView(TemplateView):
         return self.render_to_response(context=context)
 
     def post(self, request: HttpRequest, hash: str) -> HttpResponse:
-        erro = None
         pessoa = None
+        desfile = None
+        inscricao = None
         try:
             convite = self._get_convite(hash)
+            desfile = convite.desfile
             cpf = request.POST.get("cpf")
             cpf_validator(cpf)
             pessoa = Pessoa.objects.get(pk=cpf)
 
+            if inscricao := InscricaoDesfile.objects.filter(
+                desfile=convite.desfile, pessoa=pessoa
+            ).first():
+                if inscricao.aprovacao == AprovacaoChoices.REJEITADO:
+                    messages.warning(
+                        request,
+                        f"Verifique a inscrição de {pessoa} junto com seu padrinho ou responsável pelo grupo",
+                    )
+                else:
+                    messages.warning(request, str(inscricao))
+
+            tipo_pessoa = (
+                TiposPessoasChoices.CONVIDADO
+            )  # TODO: Implementar verificação nos staff-padrão para obter o tipo
+            inscricao = InscricaoDesfile.objects.create(
+                desfile=desfile,
+                pessoa=pessoa,
+                tipo_pessoa=tipo_pessoa,
+                convite=convite,
+            )
+            messages.success(request, f"Inscrição {inscricao}")
+
         except Convite.DoesNotExist:
-            erro = "Convite não foi encontrado"
+            messages.error(request, "Convite não foi encontrado")
+
         except Pessoa.DoesNotExist:
-            erro = "Não existe pessoa com este CPF"
             response = HttpEncryptedRedirectResponse(
                 reverse("cadastro_pessoa"),
                 data={"cpf": cpf, "grupo": convite.grupo.id, "convite": hash},
                 use_query=True,
             )
-
             return response
-            # TODO: Redirecionar para o cadastro
+
         except Exception as exc:
-            erro = str(exc)
+            messages.error(request, str(exc))
+
         return self.render_to_response(
             context={
                 "title": "Planetapéia - Convite",
-                "header": f"Convite para o desfile {Desfile.objects.first()}",
-                "navbar": {"links": [{"label": "Home", "link": reverse("home")}]},
+                "header": str(desfile),
+                "navbar": NavBar(request),
                 "convite": convite,
-                "desfile": Desfile.objects.first(),
-                "erro": erro,
+                "desfile": desfile,
                 "pessoa": pessoa,
+                "inscricao": inscricao,
             },
         )

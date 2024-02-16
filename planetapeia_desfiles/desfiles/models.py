@@ -1,5 +1,6 @@
 import datetime
 import decimal
+import os
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -133,11 +134,11 @@ class Pessoa(models.Model):
 
     def get_foto(self):
         if self.foto:
-            return self.foto.url
+            return static(os.path.basename(self.foto.url))
         return static(
-            "icon_male.svg"
+            "icon_male_black.svg"
             if self.genero == GenerosChoices.MASCULINO
-            else "icon_female.svg"
+            else "icon_female_black.svg"
         )
 
     @property

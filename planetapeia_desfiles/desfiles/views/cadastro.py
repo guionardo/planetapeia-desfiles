@@ -1,20 +1,19 @@
-from typing import Any
-
 from django.contrib import messages
 from django.http import HttpRequest
 from django.http.response import HttpResponse as HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
-
+from django.contrib.auth.models import User
 from ..models import Grupo, Pessoa
 from .redirect_crypt import HttpEncryptedRedirectResponse
 from .utils.navbar import NavBar
+from django.contrib.auth import login
 
 
 class CadastroPessoaView(TemplateView):
     template_name = "cadastro_pessoa.html"
 
-    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         query = HttpEncryptedRedirectResponse.get_data(request) or {}
         cpf = query.get("cpf")
         convite_hash = query.get("convite")
@@ -55,7 +54,11 @@ class CadastroPessoaView(TemplateView):
                     request,
                     f"{pessoa.nome} foi registrada com o login {pessoa.cpf} e senha {pessoa.created_password}. Guarde essa informação.",
                 )
+                user = User.objects.get(username=pessoa.cpf)
+                login(request, user)
 
+            if convite := request.POST.get("convite"):
+                return redirect("convite", convite)
             return redirect("login")
 
         except Exception as exc:

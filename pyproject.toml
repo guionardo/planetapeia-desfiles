@@ -16,6 +16,7 @@ psycopg2-binary = "^2.9.9"
 whitenoise = "^6.6.0"
 httpx = "^0.26.0"
 opencv-python = "^4.9.0.80"
+docutils = "^0.20.1"
 
 
 [build-system]

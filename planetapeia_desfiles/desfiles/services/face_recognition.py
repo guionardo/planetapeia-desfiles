@@ -32,7 +32,3 @@ def get_face_image(filename: str, width=250) -> str:
     cv2.imwrite(face_file, resized)
 
     return face_file
-
-
-# file = os.path.join(os.path.dirname(__file__), "GUIONARDO.jpg")
-# print(get_face_image(file))

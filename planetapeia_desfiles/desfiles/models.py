@@ -184,6 +184,9 @@ class Pessoa(models.Model):
         super().save(*args, **kwargs)
         _ = self.get_user()
 
+    class Meta:
+        permissions = [("pode_convidar", "Pode convidar")]
+
 
 class Veiculo(models.Model):
     nome = models.CharField(verbose_name="Nome", max_length=40)
@@ -236,6 +239,9 @@ class Grupo(models.Model):
     nome = models.CharField(verbose_name="Nome", max_length=48)
     imagem = models.ImageField(verbose_name="Imagem", upload_to=upload_to)
     tipo_cobranca_traje = models.BooleanField(verbose_name="Cobrar traje", default=True)
+    anfitrioes = models.ManyToManyField(
+        Pessoa, verbose_name="Anfitriões", related_name="grupo_anfitriao"
+    )
 
     def __str__(self):
         return self.nome

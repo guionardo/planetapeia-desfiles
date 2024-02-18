@@ -69,7 +69,13 @@ class PessoaAdmin(admin.ModelAdmin):
 
 
 class GrupoAdmin(admin.ModelAdmin):
-    pass
+    def get_form(self, request: HttpRequest, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if field := form.base_fields.get("anfitrioes"):
+            field.queryset = Pessoa.objects.filter(
+                Q(grupo=obj) & ~Q(tipo=TiposPessoasChoices.CONVIDADO)
+            )
+        return form
 
 
 class VeiculoAdmin(admin.ModelAdmin):

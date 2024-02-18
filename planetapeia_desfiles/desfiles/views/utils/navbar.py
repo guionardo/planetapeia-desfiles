@@ -52,16 +52,29 @@ class NavBar:
             return pessoa
 
     def get_userlinks(self) -> list[Link]:
-        if not self.user.is_active:
-            return []
-        return [
-            Link(self.get_name, disabled=True),
-            Link("-"),
-            Link("Painel", "home"),
-            Link("Perfil", "perfil"),
-            Link("-"),
-            Link("Logoff", "logoff"),
-        ]
+        links = []
+
+        if self.user.is_active:
+            links.extend(
+                [
+                    Link(self.get_name, disabled=True),
+                    Link("-"),
+                    Link("Painel", "home"),
+                    Link("Perfil", "perfil"),
+                    Link("Alterar senha", "admin:password_change"),
+                ]
+            )
+            if self.user.is_staff:
+                links.extend([Link("-"), Link("Administração", "admin:index")])
+
+            links.extend(
+                [
+                    Link("-"),
+                    Link("Logoff", "logoff"),
+                ]
+            )
+
+        return links
 
 
 # <li><a class="dropdown-item disabled" href="#" aria-current="page">{{ pessoa.nome }}</a></li>

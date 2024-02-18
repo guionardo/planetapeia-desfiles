@@ -1,14 +1,5 @@
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
 fail_fast: true
 repos:
-  # - repo: local
-  #   hooks:
-  #     - id: update-requirements
-  #       name: Update requirements
-  #       entry: poetry export -o requirements.txt --without-hashes
-  #       language: script
-  #       files: pyproject.toml
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
@@ -23,7 +14,7 @@ repos:
 
 
   - repo: https://github.com/Riverside-Healthcare/djLint
-    rev: v1.34.0
+    rev: v1.34.1
     hooks:
       - id: djlint-reformat-django
       - id: djlint-django
@@ -31,29 +22,11 @@ repos:
     rev: 'v1.0.5'  # Use the sha / tag you want to point at
     hooks:
     -   id: csslint
-  # - repo: https://github.com/hhatto/autopep8
-  #   rev: v2.0.4  # select the tag or revision you want, or run `pre-commit autoupdate`
-  #   hooks:
-  #     - id: autopep8
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.1.4
+    rev: v0.2.1
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
-
-
-
-
-  # - repo: https://github.com/asottile/dead
-  #   rev: v1.5.2
-  #   hooks:
-  #   -   id: dead
-#   - repo: local
-#     hooks:
-#       - id: generate-metadata
-#         name: Generate metadata
-#         entry: python editora/shared/metadata.py metadata
-#         language: python
-#         pass_filenames: false

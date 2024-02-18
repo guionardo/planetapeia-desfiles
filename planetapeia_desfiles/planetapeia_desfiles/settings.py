@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
-    "django_bootstrap5",
     "desfiles",
 ]
 

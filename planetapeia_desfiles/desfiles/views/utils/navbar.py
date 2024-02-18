@@ -75,17 +75,3 @@ class NavBar:
             )
 
         return links
-
-
-# <li><a class="dropdown-item disabled" href="#" aria-current="page">{{ pessoa.nome }}</a></li>
-#                     <li>
-#                         <hr class="dropdown-divider">
-#                     </li>
-#                     <li><a class="dropdown-item" href="{% url 'perfil' %}">Perfil</a></li>
-#                     <li><a class="dropdown-item" href="#">Customers</a></li>
-#                     <li><a class="dropdown-item" href="#">Products</a></li>
-#                     <li>
-#                         <hr class="dropdown-divider">
-#                     </li>
-#                     <li><a class="dropdown-item" href="#">Reports</a></li>
-#                     <li><a class="dropdown-item" href="#">Analytics</a></li>

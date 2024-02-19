@@ -8,6 +8,7 @@ from django.views.generic import TemplateView
 
 
 from .utils import NavBar
+from django.shortcuts import redirect
 
 
 class Index(TemplateView):
@@ -18,7 +19,7 @@ class Index(TemplateView):
             "header": "Sistema de gestão de desfiles",
             "navbar": NavBar(request),
         }
-        if request.user.is_authenticated:
-            context["user"] = str(request.user)
+        if request.user.pk:
+            return redirect("home")
 
         return self.render_to_response(context)

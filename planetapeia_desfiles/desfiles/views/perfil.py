@@ -13,7 +13,7 @@ class PerfilView(LoginRequiredMixin, TemplateView):
     template_name = "perfil_form.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not (pessoa := NavBar.get_pessoa(request)):
+        if not (pessoa := request.pessoa):
             messages.error(request, "Não foi possível identificar a pessoa logada")
             return redirect("home")
 
@@ -30,7 +30,7 @@ class PerfilEditarView(LoginRequiredMixin, TemplateView):
     template_name = "perfil_form.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not (pessoa := NavBar.get_pessoa(request)):
+        if not (pessoa := request.pessoa):
             messages.error(request, "Não foi possível identificar a pessoa logada")
             return redirect("home")
 
@@ -63,7 +63,7 @@ class PerfilEditarView(LoginRequiredMixin, TemplateView):
             "pcd",
         )
 
-        if not (pessoa := NavBar.get_pessoa(request)):
+        if not (pessoa := request.pessoa):
             messages.error(request, "Pessoa não foi identificada!")
             return redirect("home")
 
@@ -90,7 +90,7 @@ class PerfilAlterarSenhaView(LoginRequiredMixin, TemplateView):
     def get(self, request: HttpRequest) -> HttpResponse:
         nome_pessoa = request.user.get_full_name() or "não informado"
         label_nome = "Usuário administrador"
-        if pessoa := NavBar.get_pessoa(request):
+        if pessoa := request.pessoa:
             nome_pessoa = pessoa.nome
             label_nome = "CPF"
         context = dict(
@@ -132,3 +132,7 @@ class PerfilAlterarSenhaView(LoginRequiredMixin, TemplateView):
                 messages.error(request, msg)
 
         return redirect("perfil_senha")
+
+
+class PerfilFotoView(LoginRequiredMixin, TemplateView):
+    pass

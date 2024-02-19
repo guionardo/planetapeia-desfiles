@@ -64,6 +64,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.contrib.admindocs.middleware.XViewMiddleware",
+    "desfiles.middlewares.pessoa_middleware.PessoaMiddleware",
 ]
 
 ROOT_URLCONF = "planetapeia_desfiles.urls"

@@ -11,8 +11,8 @@ from ..models import (
     AprovacaoChoices,
     Convite,
     Desfile,
-    Pessoa,
     InscricaoDesfile,
+    Pessoa,
     TiposPessoasChoices,
 )
 from ..models_utils import cpf_validator
@@ -62,6 +62,10 @@ class ConviteView(TemplateView):
 
         except Convite.DoesNotExist:
             messages.error(request, "Convite não foi encontrado")
+
+        except ValidationError as exc:
+            for message in exc.messages:
+                messages.error(request, message)
 
         except Exception as exc:
             messages.error(request, str(exc))

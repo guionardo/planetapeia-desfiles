@@ -11,7 +11,9 @@ from django.contrib.auth import login
 
 
 class CadastroPessoaView(TemplateView):
-    template_name = "cadastro_pessoa.html"
+    template_name = (
+        "cadastro_pessoa.html"  # TODO: Migrat template para perfil_form.html
+    )
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         query = HttpEncryptedRedirectResponse.get_data(request) or {}

@@ -1,1 +1,10 @@
 {% extends "base/bootstrap.html" %}
+{% block content %}
+    <div class="col-lg-8 px-0">
+        <div class="row row-cols-1 row-cols-md-3 g-4 py-2">
+            {% for card in cards %}
+                <div class="col">{% include "base/card.html" %}</div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock content %}

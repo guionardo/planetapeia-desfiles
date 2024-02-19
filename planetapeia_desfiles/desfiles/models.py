@@ -2,6 +2,7 @@ import datetime
 import decimal
 import os
 
+
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -340,6 +341,9 @@ class InscricaoDesfile(models.Model):
         null=True,
         blank=True,
     )
+    grupo: Grupo = models.ForeignKey(
+        Grupo, verbose_name="Grupo", on_delete=models.PROTECT, null=True, blank=True
+    )
 
     class Meta:
         unique_together = ("desfile", "pessoa")
@@ -362,15 +366,16 @@ class InscricaoDesfile(models.Model):
         return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
+        return f"{self.pessoa} -> {self.desfile} : {self.status_aprovacao()}"
+
+    def status_aprovacao(self) -> str:
         match self.aprovacao:
             case AprovacaoChoices.APROVADO:
-                aprovacao = f"Aprovado por {self.aprovador}"
+                return f"Aprovado por {self.aprovador}"
             case AprovacaoChoices.REJEITADO:
-                aprovacao = f"Rejeitado por {self.aprovador}"
+                return f"Rejeitado por {self.aprovador}"
             case _:
-                aprovacao = "Aprovação pendente"
-
-        return f"{self.pessoa} -> {self.desfile} : {aprovacao}"
+                return "Aprovação pendente"
 
 
 class StaffPadrao(models.Model):
@@ -588,3 +593,64 @@ class Convite(models.Model):
 
     def __str__(self):
         return f"Convite para {self.desfile}"
+
+
+class ConfigChoices(models.TextChoices):
+    PESSOA_CADASTRO_HABILITADO = ("pes.cad.hab", "Cadastro de pessoas habilitado")
+
+
+class Config(models.Model):
+    name: str = models.CharField(max_length=20, primary_key=True, choices=ConfigChoices)
+    value = models.CharField(max_length=250)
+
+    def __str__(self):
+        return f"{self.get_name_display()} = {self.value}"
+
+    class Meta:
+        verbose_name = "Configuração"
+        verbose_name_plural = "Configurações"
+
+
+class UserMessageLevelChoices(models.TextChoices):
+    INFO = "I", "Informação"
+    WARN = "W", "Alerta"
+    ERROR = "E", "Erro"
+
+
+class UserMessage(models.Model):
+    user_from: User = models.ForeignKey(
+        User,
+        verbose_name="Remetente",
+        on_delete=models.PROTECT,
+        related_name="user_from",
+        editable=False,
+    )
+    user_to: User = models.ForeignKey(
+        User,
+        verbose_name="Destinatário",
+        on_delete=models.PROTECT,
+        related_name="user_to",
+        editable=False,
+    )
+    when: datetime.datetime = models.DateTimeField(
+        verbose_name="Quando", auto_now_add=True, editable=False
+    )
+    title: str = models.CharField(verbose_name="Título", max_length=40)
+    message: str = models.CharField(verbose_name="Mensagem", max_length=250)
+    read_at: datetime.datetime = models.DateTimeField(
+        verbose_name="Lida", null=True, blank=True, editable=False
+    )
+    level: str = models.CharField(
+        verbose_name="Nível",
+        max_length=1,
+        choices=UserMessageLevelChoices,
+        default=UserMessageLevelChoices.INFO,
+    )
+
+    class Meta:
+        verbose_name = "Mensagem"
+        verbose_name_plural = "Mensagens"
+        indexes = [models.Index(fields=["user_to", "when"], name="idx_msg")]
+
+    def __str__(self):
+        return f"{self.when:%d/%m/%Y %H:%M} {self.get_level_display()} {self.user_from} : {self.message}"

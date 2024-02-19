@@ -34,9 +34,13 @@
                                         {% elif link.disabled %}
                                             <a class="dropdown-item disabled" aria-disabled="true">{{ link.label }}</a>
                                         {% elif link.active %}
-                                            <a class="dropdown-item active" aria-current="page" href="#">{{ link.label }}</a>
+                                            <a class="dropdown-item active"
+                                               aria-current="page"
+                                               href="#"
+                                               title="{{ link.title }}">{{
+                                            link.label }}</a>
                                         {% else %}
-                                            <a class="dropdown-item" href="{{ link.to }}">{{ link.label }}</a>
+                                            <a class="dropdown-item" href="{{ link.to }}" title="{{ link.title }}">{{ link.label }}</a>
                                         {% endif %}
                                     </li>
                                 {% endfor %}
@@ -44,6 +48,28 @@
                         </li>
                     {% endif %}
                 </ul>
+                {% if navbar.user_messages %}
+                    <ul class="navbar-nav me-auto my-2 my-lg-0">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle"
+                               href="#"
+                               role="button"
+                               data-bs-toggle="dropdown"
+                               title="Mensagens para o usuário"
+                               aria-expanded="false">
+                                <i class="bi {{ navbar.user_messages_badge_icon }}"></i>
+                                <span class="badge {{ navbar.user_messages_badge_color }}">{{ navbar.user_messages|length }}</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                {% for msg in navbar.user_messages %}
+                                    <li>
+                                        <a class="dropdown-item">{{ msg.title }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    </ul>
+                {% endif %}
             </div>
         </div>
     </nav>

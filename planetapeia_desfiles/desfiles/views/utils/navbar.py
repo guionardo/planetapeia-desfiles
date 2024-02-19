@@ -1,11 +1,12 @@
 from dataclasses import dataclass, field
 
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.http import HttpRequest
 from django.templatetags.static import static
 from django.urls import reverse
 
-from ...models import Pessoa
+from ...services.user_messages import UserMessageLevelChoices, UserMessages
 
 
 @dataclass
@@ -14,6 +15,7 @@ class Link:
     to: str = field(default="")
     disabled: bool = field(default=False)
     active: bool = field(default=False)
+    title: str = ""
 
     @property
     def divider(self) -> bool:
@@ -27,9 +29,24 @@ class Link:
 class NavBar:
     def __init__(self, request: HttpRequest):
         self.user: User = request.user
-        self.pessoa = self.get_pessoa(request)
+        self.pessoa = request.pessoa
         self.userlinks = self.get_userlinks()
         self.is_logged = self.pessoa and self.user.is_active
+        self.user_messages = UserMessages(request).get_unreadmessages()
+        self.user_messages_badge_color = "bg-info"
+        self.user_messages_badge_icon = "bi-envelope"
+        for msg in self.user_messages:
+            match msg.level:
+                case UserMessageLevelChoices.ERROR:
+                    self.user_messages_badge_color = "bg-danger"
+                    self.user_messages_badge_icon = "bi-envelope-exclamation-fill"
+                    messages.warning(request, "Você tem mensagens de erro não lidas")
+                    break
+                case UserMessageLevelChoices.WARN:
+                    self.user_messages_badge_color = "bg-warning"
+                    self.user_messages_badge_icon = "bi-envelope-fill"
+                    messages.warning(request, "Você tem mensagens de alerta não lidas")
+                    break
 
     @property
     def get_foto(self):
@@ -46,11 +63,6 @@ class NavBar:
             return self.user.get_full_name() or self.user.get_username()
         return "anônimo"
 
-    @classmethod
-    def get_pessoa(cls, request: HttpRequest) -> Pessoa | None:
-        if pessoa := Pessoa.objects.filter(cpf=request.user.username).first():
-            return pessoa
-
     def get_userlinks(self) -> list[Link]:
         links = []
 
@@ -61,7 +73,13 @@ class NavBar:
                     Link("-"),
                     Link("Painel", "home"),
                     Link("Perfil", "perfil"),
-                    Link("Alterar senha", "admin:password_change"),
+                    Link("Foto", "perfil_foto", title="Alterar foto"),
+                    Link(
+                        "Alterar senha",
+                        "admin:password_change"
+                        if self.user.is_staff
+                        else "perfil_senha",
+                    ),
                 ]
             )
             if self.user.is_staff:

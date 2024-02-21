@@ -1,5 +1,7 @@
 # planetapeia-desfiles
 
+[![CodeQL](https://github.com/guionardo/planetapeia-desfiles/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/guionardo/planetapeia-desfiles/actions/workflows/github-code-scanning/codeql)
+
 Sistema de gestão de desfiles do Planetapéia
 
 ## Fluxos dos Usuários Administrativos
@@ -55,7 +57,7 @@ class Desfile {
 
 }
 class VeiculoDesfile {
-    + int id_veiculo    
+    + int id_veiculo
 }
 class PessoaVeiculo {
     + int id_pessoa
@@ -69,7 +71,7 @@ VeiculoDesfile "1" --> "1..*" PessoaVeiculo: contém
 ```mermaid
 classDiagram
 class Traje {
-    + string nome    
+    + string nome
     + Veiculo veiculo
 }
 
@@ -113,7 +115,7 @@ class TrajeTaxa {
     + decimal valor_pago
     + TrajeSituacaoTaxa situacao
     + date data_pagamento
-    + User usuario    
+    + User usuario
 }
 
 class TrajeSituacaoTaxa {

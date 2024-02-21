@@ -6,7 +6,10 @@ from django.urls import reverse
 from ...models import Desfile
 from .home_card import HomeCard
 
+from .decorators import just_admin
 
+
+@just_admin
 def get_desfiles_ativos(request: HttpRequest) -> HomeCard:
     desde = date.today() - timedelta(days=30)
     desfiles = [str(desfile) for desfile in Desfile.objects.filter(data__gte=desde)]

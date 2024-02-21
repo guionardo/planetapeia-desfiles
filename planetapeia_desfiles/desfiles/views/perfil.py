@@ -135,4 +135,17 @@ class PerfilAlterarSenhaView(LoginRequiredMixin, TemplateView):
 
 
 class PerfilFotoView(LoginRequiredMixin, TemplateView):
-    pass
+    template_name = "perfil_foto.html"
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        if disabled := not request.pessoa:
+            messages.warning(
+                request,
+                f"O usuário {request.user} é um administrador sem perfil de pessoa. Não há fotografia vinculada a ele",
+            )
+        context = dict(navbar=NavBar(request), foto=request.foto, disabled=disabled)
+
+        return self.render_to_response(context)
+
+    def post(self, request: HttpRequest):
+        return self.render_to_response({})

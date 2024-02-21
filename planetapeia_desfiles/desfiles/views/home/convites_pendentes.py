@@ -6,12 +6,15 @@ from django.urls import reverse
 from ...models import AprovacaoChoices, Convite, InscricaoDesfile, Pessoa
 from .home_card import HomeCard
 
+from .decorators import just_admin
 
+
+@just_admin
 def get_convites_pendentes(request: HttpRequest) -> HomeCard:
     try:
         pessoa = Pessoa.objects.get(pk=request.user.username)
         convites = Convite.objects.filter(
-            grupo=pessoa.grupo, desfile_data__gte=date.today()
+            grupo=pessoa.grupo, desfile__data__gte=date.today()
         )
     except Pessoa.DoesNotExist:
         convites = Convite.objects.filter(desfile__data__gte=date.today())

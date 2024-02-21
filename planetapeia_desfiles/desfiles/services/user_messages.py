@@ -12,9 +12,13 @@ class UserMessages:
         self.log = logging.getLogger(self.__class__.__name__)
 
     def get_unreadmessages(self):
-        return list(
-            UserMessage.objects.filter(user_to=self.user, read_at=None).order_by("when")
-        )
+        if self.user.is_active:
+            return list(
+                UserMessage.objects.filter(user_to=self.user, read_at=None).order_by(
+                    "when"
+                )
+            )
+        return []
 
     def send_message(
         self,

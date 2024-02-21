@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 
 import environ
+import dj_database_url
 
 env = environ.Env(
     # set casting, default value
@@ -37,8 +38,12 @@ DEBUG = env("DEBUG")
 
 # fly.io
 APP_NAME = os.environ.get('"FLY_APP_NAME')
-ALLOWED_HOSTS = ["localhost", f"{APP_NAME}.fly.dev"]
-CSRF_TRUSTED_ORIGINS = ["http://localhost", f"https://{APP_NAME}.fly.dev"]
+ALLOWED_HOSTS = ["localhost", f"{APP_NAME}.fly.dev", "planetapeia-desfiles.fly.dev"]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost",
+    f"https://{APP_NAME}.fly.dev",
+    "https://planetapeia-desfiles.fly.dev",
+]
 
 # Application definition
 
@@ -91,15 +96,21 @@ WSGI_APPLICATION = "planetapeia_desfiles.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "postgres",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
-        "HOST": "localhost",
-        "POST": 5432,
-    },
+    "default": dj_database_url.config(
+        default="postgres://postgres:postgres@localhost:5432/postgres",
+        conn_max_age=600,
+        conn_health_checks=True,
+    ),
+    # "default": {
+    #     "ENGINE": "django.db.backends.postgresql_psycopg2",
+    #     "NAME": "postgres",
+    #     "USER": "postgres",
+    #     "PASSWORD": "postgres",
+    #     "HOST": "localhost",
+    #     "POST": 5432,
+    # },
     "default_": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
@@ -109,6 +120,7 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {

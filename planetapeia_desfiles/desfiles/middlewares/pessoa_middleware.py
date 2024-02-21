@@ -4,6 +4,7 @@ from django.http.request import HttpRequest
 
 from ..models import Pessoa
 from ..services.mem_cache import MemCache
+from django.templatetags.static import static
 
 
 def get_pessoa_from_request(request: HttpRequest) -> Pessoa | None:
@@ -40,7 +41,12 @@ class PessoaMiddleware:
         return pessoa
 
     def __call__(self, request: HttpRequest):
-        request.pessoa = self.get_pessoa(request)
+        request.pessoa: Pessoa = self.get_pessoa(request)
+        request.foto = (
+            request.pessoa.get_foto()
+            if request.pessoa
+            else static("icon_admin_black.svg")
+        )
         response = self.get_response(request)
 
         return response

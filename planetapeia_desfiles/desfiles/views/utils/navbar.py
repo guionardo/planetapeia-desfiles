@@ -73,7 +73,11 @@ class NavBar:
                     Link("-"),
                     Link("Painel", "home"),
                     Link("Perfil", "perfil"),
-                    Link("Foto", "perfil_foto", title="Alterar foto"),
+                    Link(
+                        "Foto",
+                        "perfil_foto",
+                        title="Alterar foto",
+                    ),
                     Link(
                         "Alterar senha",
                         "admin:password_change"

@@ -64,36 +64,34 @@ class NavBar:
         return "anônimo"
 
     def get_userlinks(self) -> list[Link]:
+        if not self.user.is_active:
+            return []
         links = []
+        links.extend(
+            [
+                Link(self.get_name, disabled=True),
+                Link("-"),
+                Link("Painel", "home"),
+                Link("Perfil", "perfil"),
+                Link(
+                    "Foto",
+                    "perfil_foto",
+                    title="Alterar foto",
+                ),
+                Link(
+                    "Alterar senha",
+                    "admin:password_change" if self.user.is_staff else "perfil_senha",
+                ),
+            ]
+        )
+        if self.user.is_staff:
+            links.extend([Link("-"), Link("Administração", "admin:index")])
 
-        if self.user.is_active:
-            links.extend(
-                [
-                    Link(self.get_name, disabled=True),
-                    Link("-"),
-                    Link("Painel", "home"),
-                    Link("Perfil", "perfil"),
-                    Link(
-                        "Foto",
-                        "perfil_foto",
-                        title="Alterar foto",
-                    ),
-                    Link(
-                        "Alterar senha",
-                        "admin:password_change"
-                        if self.user.is_staff
-                        else "perfil_senha",
-                    ),
-                ]
-            )
-            if self.user.is_staff:
-                links.extend([Link("-"), Link("Administração", "admin:index")])
-
-            links.extend(
-                [
-                    Link("-"),
-                    Link("Logoff", "logoff"),
-                ]
-            )
+        links.extend(
+            [
+                Link("-"),
+                Link("Logoff", "logoff"),
+            ]
+        )
 
         return links

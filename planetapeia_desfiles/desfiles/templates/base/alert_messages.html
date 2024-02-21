@@ -1,0 +1,8 @@
+{% load bs_alert_messages %}
+{% if messages %}
+    <div class="container my-2">
+        {% for message in messages %}
+            {% bs_alert message %}
+        {% endfor %}
+    </div>
+{% endif %}

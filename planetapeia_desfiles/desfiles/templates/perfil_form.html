@@ -1,0 +1,212 @@
+{% extends "base/bootstrap.html" %}
+{% load phone_filter %}
+{% block content %}
+    <div class="col-lg-12 px-0">
+        <form {% if not readonly %}method="post" enctype="multipart/form-data"{% endif %}>
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <span class="input-group-text">CPF</span>
+                {% if readonly or pessoa.cpf %}
+                    <span class="input-group-text">{{ pessoa.cpf }}</span>
+                {% else %}
+                    <input type="text"
+                           class="form-control"
+                           name="cpf"
+                           id="CPF"
+                           maxlength="11"
+                           minlength="11"
+                           pattern="[0-9]{11}"
+                           title="Informe seu CPF usando apenas números"
+                           aria-describedby="cpfHelp"
+                           {% if pessoa.cpf %}disabled{% endif %}
+                           value="{{ pessoa.cpf }}">
+                {% endif %}
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Nome</span>
+                {% if readonly %}
+                    <span class="input-group-text">{{ pessoa.nome }}</span>
+                {% else %}
+                    <input type="text"
+                           class="form-control"
+                           name="nome"
+                           id="NOME"
+                           maxlength="60"
+                           minlength="6"
+                           placeholder="Nome completo"
+                           title="Informe seu nome completo"
+                           value="{{ pessoa.nome }}">
+                {% endif %}
+            </div>
+            <div class="row mb-3">
+                <div class="input-group col">
+                    <span class="input-group-text">Telefone</span>
+                    {% if readonly %}
+                        <span class="input-group-text">{{ pessoa.telefone|format_phone }}</span>
+                    {% else %}
+                        <input type="text"
+                               class="form-control"
+                               name="telefone"
+                               id="TELEFONE"
+                               maxlength="11"
+                               minlength="8"
+                               pattern="[0-9]{8-11}"
+                               placeholder="Telefone"
+                               title="Informe seu telefone usando apenas números"
+                               value="{{ pessoa.telefone }}">
+                    {% endif %}
+                </div>
+                <div class="input-group col">
+                    <span class="input-group-text">Data de nascimento</span>
+                    {% if readonly %}
+                        <span class="input-group-text">{{ pessoa.data_nascimento }}</span>
+                    {% else %}
+                        <input type="date"
+                               class="form-control"
+                               name="data_nascimento"
+                               id="NASCIMENTO"
+                               placeholder="Data de nascimento"
+                               value="{{ pessoa.data_nascimento|date:'Y-m-d' }}">
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="input-group col">
+                    <span class="input-group-text">Gênero</span>
+                    {% if readonly %}
+                        <span class="input-group-text">{{ pessoa.get_genero_display }}</span>
+                    {% else %}
+                        <div class="input-group-text">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="genero"
+                                   id="GENERO_M"
+                                   value="M"
+                                   {% if pessoa.genero == "M" %}checked{% endif %}>
+                            &nbsp;
+                            <label class="form-check-label" for="GENERO_M">Masc</label>
+                        </div>
+                        <div class="input-group-text">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="genero"
+                                   id="GENERO_F"
+                                   value="F"
+                                   {% if pessoa.genero == "F" %}checked{% endif %}>
+                            &nbsp;
+                            <label class="form-check-label" for="GENERO_F">Fem</label>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="input-group col">
+                    <span class="input-group-text">Peso</span>
+                    {% if readonly %}
+                        <span class="input-group-text">{{ pessoa.peso }}</span>
+                        <span class="input-group-text">kg</span>
+                    {% else %}
+                        <input type="number"
+                               class="form-control"
+                               name="peso"
+                               id="PESO"
+                               min="1"
+                               max="160"
+                               title="Informe seu peso em Kg"
+                               value="{{ pessoa.peso }}">
+                    {% endif %}
+                </div>
+                <div class="input-group col">
+                    <span class="input-group-text">Altura</span>
+                    {% if readonly %}
+                        <span class="input-group-text">{{ pessoa.altura }}</span>
+                        <span class="input-group-text">cm</span>
+                    {% else %}
+                        <input type="number"
+                               class="form-control"
+                               name="altura"
+                               id="ALTURA"
+                               min="30"
+                               max="220"
+                               title="Informe sua altura em cm"
+                               value="{{ pessoa.altura }}">
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="input-group col">
+                    <label class="input-group-text">Tamanho do traje</label>
+                    {% if readonly %}
+                        <span class="input-group-text">{{ pessoa.get_tamanho_traje_display }}</span>
+                    {% else %}
+                        <select class="form-select" id="TAMANHO_TRAJE" name="tamanho_traje">
+                            <option disabled>Escolha...</option>
+                            <option value="P" {% if pessoa.tamanho == 'P' %}selected{% endif %}>Pequeno</option>
+                            <option value="M" {% if pessoa.tamanho == 'M' %}selected{% endif %}>Médio</option>
+                            <option value="G" {% if pessoa.tamanho == 'G' %}selected{% endif %}>Grande</option>
+                            <option value="E" {% if pessoa.tamanho == 'E' %}selected{% endif %}>Extra Grande</option>
+                        </select>
+                    {% endif %}
+                </div>
+                <div class="input-group col">
+                    <div class="input-group-text">
+                        <input class="form-check-input mt-0"
+                               type="checkbox"
+                               name="pcd"
+                               aria-label="Pessoa com Deficiência"
+                               {% if pessoa.pcd %}checked{% endif %}
+                               {% if readonly %}disabled{% endif %}>
+                    </div>
+                    <span class="input-group-text">Pessoa com Deficiência</span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                {% if readonly %}
+                    <img src="{{ pessoa.get_foto }}"
+                         alt="foto"
+                         class="img-fluid img250"
+                         width="250px"
+                         height="auto" />
+                {% else %}
+                    <div class="input-group col">
+                        <label class="input-group-text">Foto</label>
+                        <input class="form-control"
+                               type="file"
+                               name="foto"
+                               id="fileField"
+                               onchange="preview()">
+                        <button onclick="clearImage()" class="btn btn-primary">Limpar</button>
+                    </div>
+                    <img id="previewImg"
+                         alt="foto"
+                         src=""
+                         class="img250"
+                         width="250px"
+                         height="auto" />
+                {% endif %}
+            </div>
+            <script>
+                const previewImg=document.getElementById('previewImg')
+                const fileField=document.getElementById('fileField')
+                function preview() {
+                    previewImg.src = URL.createObjectURL(event.target.files[0]);
+                    previewImg.style='max-width: 250px';
+                    previewImg.setAttribute('max-height','250px')
+                }
+                function clearImage() {
+                    fileField.value = null;
+                    previewImg.src = "";
+                    previewImg.style='display: none;';
+
+                }
+                clearImage()
+            </script>
+            <input type="hidden" name="grupo_id" value="{{ grupo_id }}">
+            <input type="hidden" name="convite" value="{{ convite }}">
+            {% if readonly %}
+                <a class="btn btn-success" href="{% url 'perfil_editar' %}">Editar</a>
+                <a class="btn btn-success" href="{% url 'perfil_senha' %}">Alterar senha</a>
+            {% else %}
+                <button type="submit" class="btn btn-primary">Enviar</button>
+            {% endif %}
+        </form>
+    </div>
+{% endblock content %}

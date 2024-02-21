@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "planetapeia-desfiles"
+version = "0.1.0"
+description = "Sistema de gestão de desfiles do Planetapeia"
+authors = ["Guionardo <guionardo@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Django = "^5.0.2"
+pillow = "^10.2.0"
+gunicorn = "^21.2.0"
+django-environ = "^0.11.2"
+psycopg2-binary = "^2.9.9"
+whitenoise = "^6.6.0"
+httpx = "^0.26.0"
+docutils = "^0.20.1"
+dj-database-url = "^2.1.0"
+opencv-python-headless = "^4.9.0.80"
+opencv-python = "^4.9.0.80"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[virtualenvs]
+create = true
+in-project = true

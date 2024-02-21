@@ -1,0 +1,29 @@
+{% extends "base/bootstrap.html" %}
+{% block content %}
+    <div class="col-lg-8 px-0">
+        <form method="post">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <span class="input-group-text">CPF</span>
+                <input type="text"
+                       class="form-control"
+                       name="cpf"
+                       id="CPF"
+                       maxlength="11"
+                       minlength="11"
+                       pattern="[0-9]{11}"
+                       title="Informe seu CPF usando apenas números">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Senha</span>
+                <input type="password"
+                       class="form-control"
+                       name="senha"
+                       id="SENHA"
+                       placeholder="Senha"
+                       title="Informe sua senha">
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+    </div>
+{% endblock content %}

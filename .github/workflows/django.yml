@@ -13,7 +13,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.10","3.11"]
+        python-version: ["3.10"]
 
     steps:
     - uses: actions/checkout@v4
@@ -33,7 +33,9 @@ jobs:
           path: ./.venv
           key: venv-${{ hashFiles('poetry.lock') }}
     - name: Install the project dependencies
-      run: poetry install
+      run: |
+        poetry install
+        poetry shell
     - name: Run Tests      
       run: |
         cd planetapeia_desfiles

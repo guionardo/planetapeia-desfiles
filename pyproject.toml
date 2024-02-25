@@ -19,6 +19,7 @@ docutils = "^0.20.1"
 dj-database-url = "^2.1.0"
 opencv-python-headless = "^4.9.0.80"
 opencv-python = "^4.9.0.80"
+rich = "^13.7.0"
 
 
 [build-system]

@@ -167,3 +167,40 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "/login/"
+
+LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
+        }
+    },
+    "formatters": {
+        "rich": {"datefmt": "[%X]"},
+    },
+    "handlers": {
+        "console": {
+            "class": "rich.logging.RichHandler",
+            "filters": ["require_debug_true"],
+            "formatter": "rich",
+            "level": LOG_LEVEL,
+            "rich_tracebacks": True,
+            "tracebacks_show_locals": True,
+        },
+    },
+    # 'handlers': {
+    #     'console': {
+    #         'level': LOG_LEVEL,
+    #         'filters': ['require_debug_true'],
+    #         'class': 'logging.StreamHandler',
+    #     }
+    # },
+    "loggers": {
+        "django.db.backends": {
+            "level": "INFO",  # LOG_LEVEL,
+            "handlers": ["console"],
+        }
+    },
+}

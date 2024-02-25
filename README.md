@@ -35,6 +35,7 @@ class Grupo {
     + string nome
     + string imagem
     + TipoCobrancaTraje cobrar_taxa_traje
+    + Pessoa[] anfitrioes
 }
 
 class TipoCobrancaTraje {
@@ -44,6 +45,7 @@ class TipoCobrancaTraje {
 }
 
 Grupo .. TipoCobrancaTraje
+Grupo "1" --> "1..*" Pessoa: contém
 ```
 
 ### Cadastro de Desfile
@@ -54,7 +56,10 @@ class Desfile {
     + string nome
     + string local
     + date data
-
+    + Veiculo[] veiculos
+    + bool confirmado
+    + User aprovador
+    + datetime data_aprovacao
 }
 class VeiculoDesfile {
     + int id_veiculo
@@ -62,8 +67,21 @@ class VeiculoDesfile {
 class PessoaVeiculo {
     + int id_pessoa
 }
+
+class InscricaoDesfile {
+    + Desfile desfile
+    + Pessoa pessoa
+    + TipoPessoa tipo_pessoa
+    + Veiculo veiculo
+    + Aprovacao aprovacao
+    + User aprovador
+    + datetime data_aprovacao
+    + Convite convite
+    + Grupo grupo
+}
 Desfile "1" --> "1..*" VeiculoDesfile: contém
 VeiculoDesfile "1" --> "1..*" PessoaVeiculo: contém
+VeiculoDesfile "1" --> "1..*" InscricaoDesfile: contém
 ```
 
 ### Cadastro de Traje

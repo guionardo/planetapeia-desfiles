@@ -33,7 +33,7 @@ class NavBar:
         self.localizacao = str(request.location)
         self.userlinks = self.get_userlinks()
         self.is_logged = self.pessoa and self.user.is_active
-        self.user_messages = UserMessages(request).get_unreadmessages()
+        self.user_messages = list(UserMessages(request).get_unreadmessages())
         self.user_messages_badge_color = "bg-info"
         self.user_messages_badge_icon = "bi-envelope"
         for msg in self.user_messages:

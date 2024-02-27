@@ -9,7 +9,6 @@ from django.views.generic import TemplateView
 
 from ..models_utils import cpf_validator
 from ..services import auth_service
-from ..services.user_messages import UserMessages
 from ..views.utils import NavBar, get_post_data
 
 
@@ -172,12 +171,7 @@ class PerfilRevisarSenha(TemplateView):
 
     def post(self, request: HttpRequest, cpf):
         if revisao := auth_service.criar_revisao_senha(cpf):
-            if admins := list(User.objects.filter(is_active=True, is_staff=True).all()):
-                um = UserMessages(request)
-                for admin in admins:
-                    um.send_message(
-                        admin, f"{revisao.pessoa} solicitou revisão de senha"
-                    )
+            if User.objects.filter(is_active=True, is_staff=True).count():
                 messages.success(
                     request, "Notificação enviada aos usuários administradores"
                 )

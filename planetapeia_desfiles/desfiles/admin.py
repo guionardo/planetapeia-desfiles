@@ -11,6 +11,7 @@ from .admins.user_messages import UserMessagesAdmin
 from .admins.veiculo import VeiculoAdmin
 from .admins.config import ConfigAdmin
 from .admins.localizacao import LocalizacaoAdmin
+from .admins.revisao_senha import RevisaoSenhaAdmin
 from .models import (
     Config,
     Convite,
@@ -25,6 +26,7 @@ from .models import (
     UserMessage,
     Veiculo,
     PessoaLocalizacao,
+    PessoaRevisarSenha,
 )
 
 
@@ -45,6 +47,7 @@ admin.site.register(Convite, ConviteAdmin)
 admin.site.register(InscricaoDesfile, InscricaoDesfileAdmin)
 
 admin.site.register(UserMessage, UserMessagesAdmin)
+admin.site.register(PessoaRevisarSenha, RevisaoSenhaAdmin)
 
 admin.site.site_title = "Planetapéia Desfiles"
 admin.site.site_header = "Planetapéia Desfiles"

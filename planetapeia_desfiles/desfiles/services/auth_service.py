@@ -1,6 +1,5 @@
 from django.contrib import messages
 from django.contrib.auth import login
-from django.contrib.auth.models import AnonymousUser
 from django.http.request import HttpRequest
 
 from ..models import Pessoa, PessoaRevisarSenha
@@ -21,7 +20,7 @@ def atualizar_senha_revisada(revisao: PessoaRevisarSenha, request: HttpRequest) 
             request,
             f"Sua senha foi redefinida automaticamente para {nova_senha} pelo usuário {revisao.atendida_por} em {revisao.atendida_em:%d/%m/%Y %H:%M}",
         )
-        if isinstance(request.user, AnonymousUser):
+        if not request.user.is_active:
             login(request, revisao.pessoa.get_user())
             messages.info(
                 request, f"Já efetuei o login automático do usuário {revisao.pessoa}"

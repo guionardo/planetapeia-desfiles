@@ -63,7 +63,9 @@
                             <ul class="dropdown-menu">
                                 {% for msg in navbar.user_messages %}
                                     <li>
-                                        <a class="dropdown-item" href="{{ msg.link }}">{{ msg.title }}</a>
+                                        <a class="dropdown-item"
+                                           href="{{ msg.full_link }}"
+                                           title="{{ msg.title }}">{{ msg.message }}</a>
                                     </li>
                                 {% endfor %}
                             </ul>

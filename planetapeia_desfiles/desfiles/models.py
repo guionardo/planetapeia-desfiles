@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.templatetags.static import static
+from django.urls import reverse
 
 from .models_utils import (
     convite_hash,
@@ -662,6 +663,19 @@ class UserMessage(models.Model):
     def __str__(self):
         return f"{self.when:%d/%m/%Y %H:%M} {self.get_level_display()} {self.user_from} : {self.message}"
 
+    @property
+    def full_link(self) -> str:
+        return self.link or (
+            ""
+            if not self.id
+            else reverse(
+                "admin:{}_{}_change".format(
+                    self._meta.app_label, self._meta.model_name
+                ),
+                args=(self.pk,),
+            )
+        )
+
 
 def create_guid() -> str:
     """Create a UUID with length 36"""
@@ -692,11 +706,15 @@ class PessoaRevisarSenha(models.Model):
     ativa: bool = models.BooleanField(verbose_name="Ativa", default=True)
 
     def __str__(self):
-        return f"{self.pessoa} @ {self.data_solicitacao}" + (
+        return f"{self.pessoa} @ {self.data_solicitacao:%d/%m/%Y %H:%M}" + (
             ""
             if not self.atendida_em
             else f" atendida por {self.atendida_por} [{self.atendida_em:%d/%m/%Y %H:%M}]"
         )
+
+    class Meta:
+        verbose_name = "Revisão de senha"
+        verbose_name_plural = "Revisões de senha"
 
 
 class PessoaLocalizacao(models.Model):

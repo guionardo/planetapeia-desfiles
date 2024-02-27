@@ -70,6 +70,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.contrib.admindocs.middleware.XViewMiddleware",
     "desfiles.middlewares.pessoa_middleware.PessoaMiddleware",
+    "desfiles.middlewares.location_middleware.LocationMiddleware",
+    "desfiles.middlewares.password_recovery_middleware.PasswordRecoveryMiddleware",
 ]
 
 ROOT_URLCONF = "planetapeia_desfiles.urls"

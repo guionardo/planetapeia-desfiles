@@ -1,10 +1,10 @@
 import logging
 
 from django.http.request import HttpRequest
+from django.templatetags.static import static
 
 from ..models import Pessoa
 from ..services.mem_cache import MemCache
-from django.templatetags.static import static
 
 
 def get_pessoa_from_request(request: HttpRequest) -> Pessoa | None:
@@ -47,6 +47,7 @@ class PessoaMiddleware:
             if request.pessoa
             else static("icon_admin_black.svg")
         )
+
         response = self.get_response(request)
 
         return response

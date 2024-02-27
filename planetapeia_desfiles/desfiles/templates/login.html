@@ -12,7 +12,8 @@
                        maxlength="11"
                        minlength="11"
                        pattern="[0-9]{11}"
-                       title="Informe seu CPF usando apenas números">
+                       title="Informe seu CPF usando apenas números"
+                       value="{{ cpf }}">
             </div>
             <div class="input-group mb-3">
                 <span class="input-group-text">Senha</span>
@@ -24,6 +25,30 @@
                        title="Informe sua senha">
             </div>
             <button type="submit" class="btn btn-primary">Enviar</button>
+            {% if revisar_senha %}
+                <input type="hidden" name="revisar_senha" value="1" />
+                <script>
+                    function revisarSenha(elm){
+                        // elm.preventDefault()
+
+
+    let cpf=document.getElementById('CPF').value
+    const cpfPattern=/^[0-9]{11}/;
+    if (!cpf.match(cpfPattern)){
+        alert('CPF deve conter 11 dígitos')
+        return
+    }
+    const link=`{% url 'perfil_revisar_senha_template' %}/${cpf}`
+    console.info('Direcionando para',link)
+    window.location=(link)
+}
+                </script>
+                <button onclick="revisarSenha()"
+                        class="btn btn-secondary"
+                        title="Um usuário administrador receberá sua solicitação e entrará em contato">
+                    Solicitar nova senha
+                </button>
+            {% endif %}
         </form>
     </div>
 {% endblock content %}

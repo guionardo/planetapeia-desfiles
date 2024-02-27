@@ -1,14 +1,19 @@
 import logging
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AnonymousUser, User
 from django.http.request import HttpRequest
 
-from ..models import UserMessage, UserMessageLevelChoices
+from ..models import Pessoa, UserMessage, UserMessageLevelChoices
+from ..models_utils import get_robot_user
 
 
 class UserMessages:
     def __init__(self, request: HttpRequest):
-        self.user = request.user
+        self.user = (
+            get_robot_user()
+            if isinstance(request.user, AnonymousUser)
+            else request.user
+        )
         self.log = logging.getLogger(self.__class__.__name__)
 
     def get_unreadmessages(self):
@@ -22,11 +27,13 @@ class UserMessages:
 
     def send_message(
         self,
-        user_to: User,
+        user_to: User | Pessoa,
         message: str,
         level: UserMessageLevelChoices = UserMessageLevelChoices.INFO,
     ):
         try:
+            if isinstance(user_to, Pessoa):
+                user_to = user_to.get_user()
             msg = UserMessage.objects.create(
                 user_from=self.user, user_to=user_to, message=message, level=level
             )

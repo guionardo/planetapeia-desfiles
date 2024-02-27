@@ -1,14 +1,15 @@
 import datetime
 import decimal
+import logging
 import os
-
+import uuid
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.templatetags.static import static
-from .services.face_recognition import get_face_image
+
 from .models_utils import (
     convite_hash,
     cpf_validator,
@@ -16,6 +17,7 @@ from .models_utils import (
     default_user_password,
     upload_to,
 )
+from .services.face_recognition import get_face_image
 
 
 class GenerosChoices(models.TextChoices):
@@ -164,12 +166,14 @@ class Pessoa(models.Model):
         self.created_password = default_user_password(
             self.cpf, self.nome, self.data_nascimento
         )
-        return User.objects.create_user(
+        user = User.objects.create_user(
             username=self.cpf,
             first_name=nome,
             last_name=sobrenome,
             password=self.created_password,
         )
+        logging.getLogger("Pessoa").info("Usuário {user} criado para pessoa {self}")
+        return user
 
     def clean(self):
         # Nome completo
@@ -646,6 +650,9 @@ class UserMessage(models.Model):
         choices=UserMessageLevelChoices,
         default=UserMessageLevelChoices.INFO,
     )
+    link: str = models.CharField(
+        verbose_name="Link", max_length=128, null=True, blank=True
+    )
 
     class Meta:
         verbose_name = "Mensagem"
@@ -654,3 +661,60 @@ class UserMessage(models.Model):
 
     def __str__(self):
         return f"{self.when:%d/%m/%Y %H:%M} {self.get_level_display()} {self.user_from} : {self.message}"
+
+
+def create_guid() -> str:
+    """Create a UUID with length 36"""
+    return str(uuid.uuid1())
+
+
+class PessoaRevisarSenha(models.Model):
+    guid: str = models.CharField(
+        verbose_name="GUID", max_length=36, default=create_guid, primary_key=True
+    )
+    pessoa: Pessoa = models.ForeignKey(
+        Pessoa, verbose_name="Pessoa", on_delete=models.PROTECT, editable=False
+    )
+    data_solicitacao: datetime = models.DateTimeField(
+        verbose_name="Data solicitação", auto_now_add=True
+    )
+    atendida_por: User = models.ForeignKey(
+        User,
+        verbose_name="Atendida por",
+        on_delete=models.PROTECT,
+        editable=False,
+        blank=True,
+        null=True,
+    )
+    atendida_em: datetime = models.DateTimeField(
+        verbose_name="Atendida em", blank=True, null=True
+    )
+    ativa: bool = models.BooleanField(verbose_name="Ativa", default=True)
+
+    def __str__(self):
+        return f"{self.pessoa} @ {self.data_solicitacao}" + (
+            ""
+            if not self.atendida_em
+            else f" atendida por {self.atendida_por} [{self.atendida_em:%d/%m/%Y %H:%M}]"
+        )
+
+
+class PessoaLocalizacao(models.Model):
+    when: datetime.datetime = models.DateTimeField(
+        verbose_name="Quando", auto_now_add=True, editable=False
+    )
+    pessoa: Pessoa = models.ForeignKey(
+        Pessoa, verbose_name="Pessoa", on_delete=models.PROTECT, editable=False
+    )
+    ip: str = models.GenericIPAddressField(verbose_name="IP")
+    pais: str = models.CharField(verbose_name="País", max_length=20)
+    estado: str = models.CharField(verbose_name="Estado", max_length=30)
+    cidade: str = models.CharField(verbose_name="Cidade", max_length=30)
+
+    class Meta:
+        indexes = [models.Index(fields=["pessoa", "when"], name="idx_loc")]
+        verbose_name = "Localização"
+        verbose_name_plural = "Localizações"
+
+    def __str__(self):
+        return f"{self.pessoa} [{self.ip} : {self.pais}|{self.estado}|{self.cidade}] @ {self.when:%d/%m/%Y %H:%M}"

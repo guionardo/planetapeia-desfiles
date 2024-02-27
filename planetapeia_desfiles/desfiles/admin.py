@@ -10,6 +10,7 @@ from .admins.traje import TrajeAdmin, TrajeInventarioAdmin
 from .admins.user_messages import UserMessagesAdmin
 from .admins.veiculo import VeiculoAdmin
 from .admins.config import ConfigAdmin
+from .admins.localizacao import LocalizacaoAdmin
 from .models import (
     Config,
     Convite,
@@ -23,10 +24,12 @@ from .models import (
     TrajeInventario,
     UserMessage,
     Veiculo,
+    PessoaLocalizacao,
 )
 
 
 admin.site.register(Config, ConfigAdmin)
+admin.site.register(PessoaLocalizacao, LocalizacaoAdmin)
 
 admin.site.register(Pessoa, PessoaAdmin)
 admin.site.register(PessoaStaff, StaffsAdmin)

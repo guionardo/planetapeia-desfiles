@@ -30,6 +30,7 @@ class NavBar:
     def __init__(self, request: HttpRequest):
         self.user: User = request.user
         self.pessoa = request.pessoa
+        self.localizacao = str(request.location)
         self.userlinks = self.get_userlinks()
         self.is_logged = self.pessoa and self.user.is_active
         self.user_messages = UserMessages(request).get_unreadmessages()
@@ -71,7 +72,7 @@ class NavBar:
             [
                 Link(self.get_name, disabled=True),
                 Link("-"),
-                Link("Painel", "home"),
+                Link("Home", "home"),
                 Link("Perfil", "perfil"),
                 Link(
                     "Foto",
@@ -89,6 +90,11 @@ class NavBar:
 
         links.extend(
             [
+                Link(
+                    f"Localização: {self.localizacao}",
+                    disabled=True,
+                    title="Localização ",
+                ),
                 Link("-"),
                 Link("Logoff", "logoff"),
             ]

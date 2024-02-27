@@ -1,0 +1,23 @@
+{% extends "base/bootstrap.html" %}
+{% block content %}
+    <h5>Um usuário administrador receberá sua solicitação e entrará em contato com uma nova senha.</h5>
+    <div class="col-lg-8 px-0">
+        <form method="post">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <span class="input-group-text">CPF</span>
+                <input type="text"
+                       class="form-control"
+                       name="cpf"
+                       id="CPF"
+                       value="{{ cpf }}"
+                       disabled>
+            </div>
+            <button type="submit"
+                    class="btn btn-primary"
+                    title="Um usuário administrador receberá sua solicitação e entrará em contato">
+                Revisar senha
+            </button>
+        </form>
+    </div>
+{% endblock content %}

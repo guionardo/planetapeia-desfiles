@@ -4,10 +4,11 @@ from django.http.response import HttpResponse as HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 from django.contrib.auth.models import User
-from ..models import Grupo, Pessoa
+from ..models import Grupo, Pessoa, Convite
 from .redirect_crypt import HttpEncryptedRedirectResponse
 from .utils.navbar import NavBar
 from django.contrib.auth import login
+from ..services.user_messages import UserMessages
 
 
 class CadastroPessoaView(TemplateView):
@@ -50,12 +51,19 @@ class CadastroPessoaView(TemplateView):
                 grupo_id=int(request.POST.get("grupo_id")),
                 foto=request.FILES.get("foto"),
             )
+            convite: Convite | None = request.POST.get("convite")
             pessoa: Pessoa = Pessoa.objects.create(**data)
             if pessoa.created_password:
                 messages.success(
                     request,
                     f"{pessoa.nome} foi registrada com o login {pessoa.cpf} e senha {pessoa.created_password}. Guarde essa informação.",
                 )
+                if convite:
+                    for anfitriao in convite.grupo.anfitrioes.all():
+                        UserMessages(request).send_message(
+                            user_to=anfitriao,
+                            message=f"{pessoa} se cadastrou com o convite {convite}",
+                        )
                 user = User.objects.get(username=pessoa.cpf)
                 login(request, user)
 

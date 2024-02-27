@@ -48,6 +48,3 @@ def post_save_veiculo(sender, instance: Veiculo, **kwargs):
 
 def enable():
     pass
-
-
-logging.getLogger("signals").info("Signals enabled")

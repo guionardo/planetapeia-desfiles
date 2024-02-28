@@ -276,14 +276,9 @@ class Desfile(models.Model):
         return f"{self.nome} em {self.local}: {self.data:%d/%m/%Y}"
 
     def clean(self):
-        if not self.veiculos.first():
+        if self.id and not self.veiculos.first():
             raise ValidationError("É necessário incluir ao menos um veículo no desfile")
         self.is_cleaned = True
-        # if self.confirmado and not self.aprovador:
-        #     self.confirmado = False
-        #     raise ValidationError(
-        #         "É necessário informar um aprovador para confirmar o desfile"
-        #     )
 
     def save(self, *args, **kwargs) -> None:
         if not self.is_cleaned:

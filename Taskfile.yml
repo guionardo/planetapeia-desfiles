@@ -12,6 +12,7 @@ tasks:
     silent: true
 
   migrations:
+    dir: ./planetapeia_desfiles
     cmds:
       - python manage.py makemigrations
       - python manage.py migrate
@@ -20,3 +21,8 @@ tasks:
     cmds:
       - python update_version.py
       - poetry update
+
+  deploy:
+    deps: [version]
+    cmds:
+      - fly deploy

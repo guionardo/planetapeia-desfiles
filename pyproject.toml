@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "planetapeia-desfiles"
-version = "0.1.0"
+version = "0.1.4"
 description = "Sistema de gestão de desfiles do Planetapeia"
 authors = ["Guionardo <guionardo@gmail.com>"]
 license = "MIT"
@@ -21,6 +21,7 @@ opencv-python-headless = "^4.9.0.80"
 opencv-python = "^4.9.0.80"
 rich = "^13.7.0"
 geopy = "^2.4.1"
+packaging = "^23.2"
 
 
 [build-system]

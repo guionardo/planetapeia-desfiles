@@ -13,6 +13,7 @@ class UserMessages:
         self.log = logging.getLogger(self.__class__.__name__)
 
     def get_unreadmessages(self):
+        # TODO: Implementar registro de mensagens visualizadas
         if self.user.is_active:
             for msg in UserMessage.objects.filter(
                 user_to=self.user, read_at=None

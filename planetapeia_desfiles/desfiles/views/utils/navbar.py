@@ -7,6 +7,7 @@ from django.templatetags.static import static
 from django.urls import reverse
 
 from ...services.user_messages import UserMessageLevelChoices, UserMessages
+from ...version import __VERSION__, __VERSION_DATE__
 
 
 @dataclass
@@ -30,13 +31,15 @@ class NavBar:
     def __init__(self, request: HttpRequest):
         self.user: User = request.user
         self.pessoa = request.pessoa
-        self.localizacao = str(request.location)
+        self.localizacao = str(request.location)  # TODO: Verificar localização vazia
         self.userlinks = self.get_userlinks()
         self.is_logged = self.pessoa and self.user.is_active
         self.user_messages = list(UserMessages(request).get_unreadmessages())
         self.user_messages_badge_color = "bg-info"
         self.user_messages_badge_icon = "bi-envelope"
-        for msg in self.user_messages:
+        for msg in (
+            self.user_messages
+        ):  # TODO: Mover dropdown de mensagens para uma página específica
             match msg.level:
                 case UserMessageLevelChoices.ERROR:
                     self.user_messages_badge_color = "bg-danger"
@@ -48,6 +51,9 @@ class NavBar:
                     self.user_messages_badge_icon = "bi-envelope-fill"
                     messages.warning(request, "Você tem mensagens de alerta não lidas")
                     break
+
+        self.version = __VERSION__
+        self.version_date = __VERSION_DATE__
 
     @property
     def get_foto(self):

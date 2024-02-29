@@ -4,9 +4,9 @@ from django.contrib import messages
 from django.forms import ValidationError
 from django.http import HttpRequest
 from django.http.response import HttpResponse
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import TemplateView
-
 from ...models import (
     AprovacaoChoices,
     Convite,
@@ -14,6 +14,7 @@ from ...models import (
     InscricaoDesfile,
     Pessoa,
     TiposPessoasChoices,
+    StaffPadrao,
 )
 from ...models_utils import cpf_validator
 from ..utils import HttpEncryptedRedirectResponse, NavBar
@@ -93,18 +94,24 @@ class ConviteView(TemplateView):
                         f"Verifique a inscrição de {pessoa} junto com seu padrinho ou responsável pelo grupo",
                     )
                 else:
-                    messages.warning(request, str(inscricao))
+                    messages.warning(request, f"Inscrição: {inscricao}")
+                return redirect("login")
+            else:
+                tipo_pessoa = TiposPessoasChoices.CONVIDADO
+                veiculo = None
+                if staff_padrao := StaffPadrao.objects.filter(pessoa=pessoa).first():
+                    # TODO: Implementar verificação nos staff-padrão para obter o tipo
+                    veiculo = staff_padrao.staff_padrao_veiculo.veiculo
+                    tipo_pessoa = pessoa.tipo
 
-            tipo_pessoa = (
-                TiposPessoasChoices.CONVIDADO
-            )  # TODO: Implementar verificação nos staff-padrão para obter o tipo
-            inscricao = InscricaoDesfile.objects.create(
-                desfile=desfile,
-                pessoa=pessoa,
-                tipo_pessoa=tipo_pessoa,
-                convite=convite,
-            )
-            messages.success(request, f"Inscrição {inscricao}")
+                inscricao = InscricaoDesfile.objects.create(
+                    desfile=desfile,
+                    pessoa=pessoa,
+                    tipo_pessoa=tipo_pessoa,
+                    convite=convite,
+                    veiculo=veiculo,
+                )
+                messages.success(request, f"Inscrição {inscricao}")
 
         except Convite.DoesNotExist:
             messages.error(request, "Convite não foi encontrado")

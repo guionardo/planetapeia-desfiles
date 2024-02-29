@@ -45,9 +45,15 @@ class StaffPadraoVeiculoAdmin(admin.ModelAdmin):
 
 
 class StaffsAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "staff_padrao_veiculo"]
+    list_display = ["__str__", "grupo", "staff_padrao_veiculo"]
     # fields = ["__str__", "staff_padrao_veiculo"]
     readonly_fields = ["staff_padrao_veiculo"]
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
 
     def get_queryset(self, request: HttpRequest):
         queryset = (

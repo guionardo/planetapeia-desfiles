@@ -17,6 +17,7 @@ from .models_utils import (
     data_nascimento_validator,
     default_user_password,
     upload_to,
+    get_robot_user,
 )
 from .services.face_recognition import get_face_image
 
@@ -56,6 +57,7 @@ class SituacaoTrajeChoices(models.TextChoices):
     EMPRESTADO = "E", "Emprestado"
     MANUTENCAO = "M", "Em Manutenção"
     DESCARTADO = "X", "Descartado"
+    EXTRAVIADO = "x", "Extraviado"
 
 
 class TrajeMovimentoChoices(models.TextChoices):
@@ -64,6 +66,7 @@ class TrajeMovimentoChoices(models.TextChoices):
     DEVOLUCAO = "D", "Devolução"
     MANUTENCAO = "M", "Manutenção"
     DESCARTE = "X", "Descarte"
+    EXTRAVIO = "x", "Extravio"
 
 
 class TrajeSituacaoTaxa(models.TextChoices):
@@ -484,14 +487,46 @@ class TrajeInventario(models.Model):
         verbose_name="Tamanho", choices=TamanhosTrajeChoices, max_length=1
     )
     situacao: SituacaoTrajeChoices = models.CharField(
-        verbose_name="Situação", max_length=1, choices=SituacaoTrajeChoices
+        verbose_name="Situação",
+        max_length=1,
+        choices=SituacaoTrajeChoices,
+        editable=False,
+    )
+    usuario: User = models.ForeignKey(
+        User,
+        verbose_name="Responsável",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    pessoa: Pessoa = models.ForeignKey(
+        Pessoa, verbose_name="Pessoa", on_delete=models.PROTECT, null=True, blank=True
+    )
+    ultima_atualizacao: datetime = models.DateTimeField(
+        verbose_name="Última atualização", auto_now=True
     )
 
     def __str__(self) -> str:
         return f"#{self.num_inventario} {self.traje}"
 
+    def save(self, *args, **kwargs) -> None:
+        criar_entrada = not self.id
+        super().save(*args, **kwargs)
+        if criar_entrada:
+            TrajeHistorico.objects.create(
+                traje=self,
+                obs="Entrada automática",
+                movimento=TrajeMovimentoChoices.ENTRADA,
+                usuario=get_robot_user(),
+            )
+
+    class Meta:
+        verbose_name = "Inventário"
+        verbose_name_plural = "Inventários"
+
 
 class TrajeHistorico(models.Model):
+    is_cleaned = False
     traje: TrajeInventario = models.ForeignKey(
         TrajeInventario, verbose_name="Traje", on_delete=models.PROTECT
     )
@@ -503,14 +538,106 @@ class TrajeHistorico(models.Model):
         verbose_name="Movimento", max_length=1, choices=TrajeMovimentoChoices
     )
     usuario: User = models.ForeignKey(
-        User, verbose_name="Responsável", on_delete=models.PROTECT
+        User, verbose_name="Responsável atual", on_delete=models.PROTECT
     )
     pessoa: Pessoa = models.ForeignKey(
-        Pessoa, verbose_name="Pessoa", on_delete=models.PROTECT, null=True, blank=True
+        Pessoa,
+        verbose_name="Pessoa atual",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
     )
 
     def __str__(self) -> str:
         return f"{self.traje}: {self.movimento}"
+
+    def clean(self):
+        # Verifica a situação do último histórico se for um insert
+        if self.id:
+            ultimo = (
+                TrajeHistorico.objects.filter(traje=self.traje, data__lt=self.data)
+                .order_by("data")
+                .last()
+            )
+        else:
+            ultimo = (
+                TrajeHistorico.objects.filter(traje=self.traje).order_by("data").last()
+            )
+
+        if not ultimo:
+            # O primeiro histórico deve ser uma entrada
+            if self.movimento != TrajeMovimentoChoices.ENTRADA:
+                raise ValidationError(
+                    "O primeiro histórico de um traje no inventário deve ser uma ENTRADA"
+                )
+        else:
+            # O movimento deve ser diferente do movimento anterior
+            if self.movimento == ultimo.movimento:
+                raise ValidationError(
+                    f"O movimento deve ser diferente do anterior: {self.get_movimento_display()}"
+                )
+            # trajes descartados ou extraviados não podem mais ser movimentados
+            if ultimo.movimento in [
+                TrajeMovimentoChoices.DESCARTE,
+                TrajeMovimentoChoices.EXTRAVIO,
+            ]:
+                raise ValidationError(
+                    f"Não é possível gerar movimento de um traje em situação: {ultimo.get_movimento_display()}"
+                )
+
+            allowed = {
+                TrajeMovimentoChoices.ENTRADA: [
+                    TrajeMovimentoChoices.EMPRESTIMO,
+                    TrajeMovimentoChoices.MANUTENCAO,
+                    TrajeMovimentoChoices.DESCARTE,
+                    TrajeMovimentoChoices.EXTRAVIO,
+                ],
+                TrajeMovimentoChoices.EMPRESTIMO: [
+                    TrajeMovimentoChoices.DEVOLUCAO,
+                    TrajeMovimentoChoices.EXTRAVIO,
+                ],
+                TrajeMovimentoChoices.DESCARTE: [],
+                TrajeMovimentoChoices.EXTRAVIO: [],
+                TrajeMovimentoChoices.DEVOLUCAO: [
+                    TrajeMovimentoChoices.EMPRESTIMO,
+                    TrajeMovimentoChoices.MANUTENCAO,
+                    TrajeMovimentoChoices.DESCARTE,
+                    TrajeMovimentoChoices.EXTRAVIO,
+                ],
+                TrajeMovimentoChoices.MANUTENCAO: [
+                    TrajeMovimentoChoices.DEVOLUCAO,
+                    TrajeMovimentoChoices.DESCARTE,
+                    TrajeMovimentoChoices.EXTRAVIO,
+                ],
+            }[ultimo.movimento]
+
+            if self.movimento not in allowed:
+                raise ValidationError(
+                    f"O movimento deve ser uma das opções a seguir: {', '.join(a.label for a in allowed)}"
+                )
+        situacao = {
+            TrajeMovimentoChoices.ENTRADA: SituacaoTrajeChoices.DISPONIVEL,
+            TrajeMovimentoChoices.EMPRESTIMO: SituacaoTrajeChoices.EMPRESTADO,
+            TrajeMovimentoChoices.MANUTENCAO: SituacaoTrajeChoices.MANUTENCAO,
+            TrajeMovimentoChoices.DEVOLUCAO: SituacaoTrajeChoices.DISPONIVEL,
+            TrajeMovimentoChoices.DESCARTE: SituacaoTrajeChoices.DESCARTADO,
+            TrajeMovimentoChoices.EXTRAVIO: SituacaoTrajeChoices.EXTRAVIADO,
+        }
+        self.traje.situacao = situacao[self.movimento]
+        self.traje.pessoa = self.pessoa
+        self.traje.usuario = self.usuario
+        self.traje.ultima_atualizacao = self.data
+        self.traje.save()
+        self.is_cleaned = True
+
+    def save(self, *args, **kwargs) -> None:
+        if not self.is_cleaned:
+            self.clean()
+        return super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Histórico do traje"
+        verbose_name_plural = "Históricos do traje"
 
 
 class TrajeTaxa(models.Model):

@@ -2,9 +2,10 @@ from datetime import date
 
 from django.http import HttpRequest
 from django.urls import reverse
+
 from ...models import Convite, Pessoa
-from .home_card import HomeCard
 from .decorators import just_admin
+from .home_card import HomeCard
 
 
 @just_admin
@@ -21,13 +22,12 @@ def get_convites_ativos(request: HttpRequest) -> HomeCard:
 
     links = []
     for convite in convites:
-        # links.append((f"{convite.desfile} [{convite.grupo}]", "http://localhost"))
         links.append(
             (
                 f"{convite.desfile} [{convite.grupo}]",
                 reverse("admin:desfiles_inscricaodesfile_changelist")
                 + f"?aprovacao__exact=A&grupo__id__exact={convite.grupo.id}",
-            )  # &
+            )
         )
 
     return HomeCard("Convites aprovados", links=links, text=text, style="warning")

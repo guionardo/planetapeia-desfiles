@@ -7,7 +7,7 @@ from django.http.response import HttpResponse
 from django.urls import reverse
 from django.views.generic import TemplateView
 
-from ..models import (
+from ...models import (
     AprovacaoChoices,
     Convite,
     Desfile,
@@ -15,13 +15,12 @@ from ..models import (
     Pessoa,
     TiposPessoasChoices,
 )
-from ..models_utils import cpf_validator
-from .redirect_crypt import HttpEncryptedRedirectResponse
-from .utils import NavBar
+from ...models_utils import cpf_validator
+from ..utils import HttpEncryptedRedirectResponse, NavBar
 
 
 class ConviteView(TemplateView):
-    template_name = "convite.html"
+    template_name = "convite/convite.html"
 
     def _get_convite(self, hash: str) -> Convite:
         if convite := Convite.objects.filter(hash=hash).first():

@@ -1,8 +1,9 @@
-__all__ = ["NavBar"]
+__all__ = ["NavBar", "HttpEncryptedRedirectResponse"]
 from django.http.request import HttpRequest
 
 from ...models import GenerosChoices
 from .navbar import NavBar
+from .redirect_crypt import HttpEncryptedRedirectResponse
 
 
 def get_post_data(request: HttpRequest, *variables, default_empty=""):

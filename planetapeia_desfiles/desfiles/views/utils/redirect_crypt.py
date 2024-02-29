@@ -25,6 +25,7 @@ class HttpEncryptedRedirectResponse(HttpResponseRedirect):
         else:
             headers = kwargs.setdefault("headers", {})
             headers[self.KEY] = encrypted_data
+            kwargs["headers"] = headers
         super().__init__(redirect_to, *args, **kwargs)
         # if data and not use_query:
         #     encrypted_data = self.encrypt_dict(data)

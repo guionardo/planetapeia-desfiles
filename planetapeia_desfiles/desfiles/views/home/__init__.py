@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse
+from django.urls import path
 from django.views.generic import TemplateView
 
 from ..utils import NavBar
@@ -11,7 +12,7 @@ from .revisoes_senha import get_revisoes_senha
 
 
 class HomeView(LoginRequiredMixin, TemplateView):
-    template_name = "home.html"
+    template_name = "home/home.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         context = {
@@ -26,3 +27,6 @@ class HomeView(LoginRequiredMixin, TemplateView):
             ],
         }
         return self.render_to_response(context)
+
+
+paths = [path("home", HomeView.as_view(), name="home")]

@@ -7,12 +7,12 @@ from django.http.response import HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
-from ..models import Convite
-from .utils import NavBar
+from ...models import Convite
+from ..utils import NavBar
 
 
 class ConviteChaveView(TemplateView):
-    template_name = "convite_chave.html"
+    template_name = "convite/convite_chave.html"
 
     def _get_convite(self, hash: str) -> Convite:
         if convite := Convite.objects.filter(hash=hash).first():

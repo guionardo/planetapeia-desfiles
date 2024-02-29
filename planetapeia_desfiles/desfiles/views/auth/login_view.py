@@ -1,18 +1,16 @@
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import TemplateView
 
-from ..models import Pessoa
-from . import get_post_data
-from .utils import NavBar, use_genero
+from ...models import Pessoa
+from ..utils import NavBar, get_post_data, use_genero
 
 
 class LoginView(TemplateView):
-    template_name = "login.html"
+    template_name = "auth/login.html"
 
     def get(self, request: HttpRequest) -> HttpResponse:
         if request.user.is_active:
@@ -57,14 +55,3 @@ class LoginView(TemplateView):
         login(request, user)
         messages.info(request, login_greet)
         return HttpResponseRedirect(reverse("home"))
-
-
-@login_required
-def logoff(request: HttpRequest) -> HttpResponse:
-    if request.user:
-        messages.info(
-            request,
-            f"Logoff do usuário {request.user.get_full_name() or request.user.get_username()}",
-        )
-        logout(request)
-    return redirect("index")

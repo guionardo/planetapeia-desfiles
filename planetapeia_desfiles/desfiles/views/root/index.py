@@ -4,11 +4,10 @@ View para a página /
 
 
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
-
-from .utils import NavBar
-from django.shortcuts import redirect
+from ..utils import NavBar
 
 
 class Index(TemplateView):

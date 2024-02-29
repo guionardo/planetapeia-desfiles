@@ -9,8 +9,8 @@ from ...models import AprovacaoChoices, InscricaoDesfile
 from ..utils import use_genero, NavBar
 
 
-class MeusConvites(LoginRequiredMixin, TemplateView):
-    template_name = "perfil_convites.html"
+class MeusConvitesView(LoginRequiredMixin, TemplateView):
+    template_name = "perfil/perfil_convites.html"
 
     def get(self, request: HttpRequest) -> HttpResponse:
         context = {"header": "Meus convites", "navbar": NavBar(request)}

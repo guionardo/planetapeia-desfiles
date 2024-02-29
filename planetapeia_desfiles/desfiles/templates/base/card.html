@@ -1,4 +1,4 @@
-<div class="card h-100">
+<div class="card text-bg-{{ card.style }} h-100">
     {% if card.header %}<h5 class="card-header">{{ card.header }}</h5>{% endif %}
     <div class="card-body">
         {% if card.badged_list_items %}
@@ -27,7 +27,9 @@
     {% if card.links %}
         <div class="card-footer">
             {% for link in card.links %}
-                <a href="{{ link.1 }}" class="btn btn-primary">{{ link.0 }}<span class="badge text-bg-secondary">{{ link.2 }}</span></a>
+                <a href="{{ link.1 }}" class="btn btn-primary">{{ link.0 }}
+                    {% if link.2 %}<span class="badge text-bg-secondary">{{ link.2 }}</span>{% endif %}
+                </a>
             {% endfor %}
         </div>
     {% endif %}

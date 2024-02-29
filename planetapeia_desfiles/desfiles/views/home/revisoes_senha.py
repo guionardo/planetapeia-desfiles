@@ -19,4 +19,5 @@ def get_revisoes_senha(request: HttpRequest):
                 )
             ],
             text=f"{revisoes} {'pendência' if revisoes==1 else 'pendências'}",
+            style="warning",
         )

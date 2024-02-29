@@ -37,5 +37,8 @@ def get_convites_pendentes(request: HttpRequest) -> HomeCard:
             )
 
     return HomeCard(
-        "Convites pendentes", badged_list_items=convites_pendentes, links=links
+        "Convites pendentes",
+        badged_list_items=convites_pendentes,
+        links=links,
+        style="warning",
     )

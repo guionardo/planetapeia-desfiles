@@ -30,4 +30,4 @@ def get_convites_ativos(request: HttpRequest) -> HomeCard:
             )  # &
         )
 
-    return HomeCard("Convites aprovados", links=links, text=text)
+    return HomeCard("Convites aprovados", links=links, text=text, style="warning")

@@ -19,4 +19,5 @@ def get_desfiles_ativos(request: HttpRequest) -> HomeCard:
         list_items=desfiles,
         links=[("Administração", reverse("admin:desfiles_desfile_changelist"))],
         text=f"Desfiles a partir de {desde:%d/%m/%Y}",
+        style="warning",
     )

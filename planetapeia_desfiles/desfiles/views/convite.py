@@ -26,7 +26,9 @@ class ConviteView(TemplateView):
     def _get_convite(self, hash: str) -> Convite:
         if convite := Convite.objects.filter(hash=hash).first():
             if convite.valido_ate < date.today():
-                raise ValidationError("Este convite não é mais válido")
+                raise ValidationError(
+                    f"Este convite não é mais válido ({convite.valido_ate:%d/%m/%Y})"
+                )
             if convite.convidados_confirmados >= convite.max_convidados:
                 raise ValidationError(
                     f"O limite de {convite.max_convidados} pessoas para este convite já foi atingido"

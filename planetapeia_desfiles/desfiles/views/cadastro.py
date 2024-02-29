@@ -1,20 +1,19 @@
 from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.models import User
 from django.http import HttpRequest
 from django.http.response import HttpResponse as HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
-from django.contrib.auth.models import User
-from ..models import Grupo, Pessoa, Convite
-from .redirect_crypt import HttpEncryptedRedirectResponse
-from .utils.navbar import NavBar
-from django.contrib.auth import login
+
+from ..models import Convite, Grupo, Pessoa
 from ..services.user_messages import UserMessages
+from .redirect_crypt import HttpEncryptedRedirectResponse
+from .utils import NavBar
 
 
 class CadastroPessoaView(TemplateView):
-    template_name = (
-        "cadastro_pessoa.html"  # TODO: Migrat template para perfil_form.html
-    )
+    template_name = "perfil_form.html"  # TODO: Migrat template para perfil_form.html
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         query = HttpEncryptedRedirectResponse.get_data(request) or {}

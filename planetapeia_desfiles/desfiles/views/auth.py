@@ -6,9 +6,9 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import TemplateView
 
-from ..models import GenerosChoices, Pessoa
+from ..models import Pessoa
 from . import get_post_data
-from .utils.navbar import NavBar
+from .utils import NavBar, use_genero
 
 
 class LoginView(TemplateView):
@@ -47,12 +47,7 @@ class LoginView(TemplateView):
             return self.render_to_response(context)
 
         if pessoa := Pessoa.objects.filter(pk=user.username).first():
-            login_greet = (
-                "Bem vind"
-                + ("o" if pessoa.genero == GenerosChoices.MASCULINO else "a")
-                + " "
-                + pessoa.nome
-            )
+            login_greet = use_genero(request, "Bem vind") + " " + pessoa.nome
         else:
             login_greet = f"Bem vindo {user.get_fullname() or user.get_username()}"
         if user.last_login:

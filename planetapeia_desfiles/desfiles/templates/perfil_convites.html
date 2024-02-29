@@ -1,0 +1,6 @@
+{% extends "base/bootstrap.html" %}
+{% block content %}
+    <ul class="list-group">
+        {% for inscricao in inscricoes %}<li class="list-group-item">{{ inscricao }}</li>{% endfor %}
+    </ul>
+{% endblock content %}

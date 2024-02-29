@@ -6,8 +6,8 @@
             <p>Por favor, insira seu CPF abaixo para continuarmos.</p>
             <form method="post">
                 {% csrf_token %}
-                <div class="mb-3">
-                    <label for="CPF" class="form-label">CPF</label>
+                <div class="input-group mb-3">
+                    <span class="input-group-text">CPF</span>
                     <input type="text"
                            class="form-control"
                            name="cpf"
@@ -16,13 +16,12 @@
                            minlength="11"
                            pattern="[0-9]{11}"
                            title="Informe seu CPF usando apenas números"
-                           aria-describedby="cpfHelp"
                            value="{{ cpf }}">
-                    <div id="cpfHelp" class="form-text">Não vamos compartilhar essa informação com ninguém.</div>
+                    <button type="submit" class="btn btn-primary">Enviar</button>
                 </div>
-                <button type="submit" class="btn btn-primary">Enviar</button>
             </form>
+        {% else %}
+            <a href="{% url 'index' %}" class="btn btn-primary">Voltar</a>
         {% endif %}
-        <hr class="col-1 my-4">
     </div>
 {% endblock content %}

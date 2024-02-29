@@ -1,0 +1,22 @@
+{% extends "base/bootstrap.html" %}
+{% block content %}
+    <div class="col-lg-8 px-0">
+        <p class="fs-5">Informe a chave do convite abaixo</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <span class="input-group-text">Chave</span>
+                <input type="text"
+                       class="form-control"
+                       name="chave"
+                       id="chave"
+                       maxlength="8"
+                       minlength="8"
+                       pattern="[0-9A-F]{8}"
+                       title="Informe a chave do convite">
+                <button type="submit" class="btn btn-primary">Enviar</button>
+            </div>
+            <!-- <button type="submit" class="btn btn-primary">Enviar</button> -->
+        </form>
+    </div>
+{% endblock content %}

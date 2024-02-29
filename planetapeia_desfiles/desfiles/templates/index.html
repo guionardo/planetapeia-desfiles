@@ -11,6 +11,7 @@
             <p>Você deve ter um usuário cadastrado ou receber um link de convite para acessar o sistema.</p>
             <hr class="col-6">
             <a class="btn btn-success" href="{% url 'login' %}">Login</a>
+            <a class="btn btn-primary" href="{% url 'convite_chave' %}">Tenho a chave do convite</a>
         {% endif %}
     </div>
 {% endblock content %}

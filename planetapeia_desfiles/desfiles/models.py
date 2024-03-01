@@ -623,6 +623,14 @@ class TrajeHistorico(models.Model):
             TrajeMovimentoChoices.DESCARTE: SituacaoTrajeChoices.DESCARTADO,
             TrajeMovimentoChoices.EXTRAVIO: SituacaoTrajeChoices.EXTRAVIADO,
         }
+        if (
+            self.movimento == TrajeMovimentoChoices.EMPRESTIMO
+            and self.traje.traje.genero != self.pessoa.genero
+        ):
+            raise ValidationError(
+                f"Este traje só pode ser emprestado para pessoas do gênero {self.traje.traje.get_genero_display()}"
+            )
+
         self.traje.situacao = situacao[self.movimento]
         self.traje.pessoa = self.pessoa
         self.traje.usuario = self.usuario

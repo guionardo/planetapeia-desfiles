@@ -10,7 +10,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.templatetags.static import static
 from django.urls import reverse
-
+from .services.date_time_provider import DateTimeProvider
 from .models_utils import (
     convite_hash,
     cpf_validator,
@@ -291,7 +291,7 @@ class Desfile(models.Model):
             self.aprovador = None
             self.data_aprovacao = None
         elif not self.data_aprovacao:
-            self.data_aprovacao = datetime.datetime.now()
+            self.data_aprovacao = DateTimeProvider.now()
 
         return super().save(*args, **kwargs)
 
@@ -784,6 +784,15 @@ class UserMessage(models.Model):
 
     def __str__(self):
         return f"{self.when:%d/%m/%Y %H:%M} {self.get_level_display()} {self.user_from} : {self.message}"
+
+    @property
+    def class_color(self) -> str:
+        match self.level:
+            case UserMessageLevelChoices.WARN:
+                return "warning"
+            case UserMessageLevelChoices.ERROR:
+                return "danger"
+        return "info"
 
     @property
     def full_link(self) -> str:

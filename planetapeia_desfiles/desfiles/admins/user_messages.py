@@ -1,4 +1,3 @@
-import datetime
 from collections.abc import Sequence
 from typing import Any
 
@@ -9,6 +8,7 @@ from django.db.models.query import QuerySet
 from django.http import HttpRequest
 
 from ..models import UserMessage
+from ..services.date_time_provider import DateTimeProvider
 from ..services.mem_cache import MemCache
 
 
@@ -29,7 +29,7 @@ pessoas_cache = PessoasCache()
 
 @admin.action(description="Marcar como lidas")
 def marcar_como_lidas(modeladmin, request, queryset):
-    queryset.update(read_at=datetime.datetime.now())
+    queryset.update(read_at=DateTimeProvider.now())
 
 
 class PessoaFilter(RelatedFieldListFilter):

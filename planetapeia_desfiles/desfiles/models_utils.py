@@ -6,6 +6,8 @@ import struct
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
+from .services.date_time_provider import DateTimeProvider
+
 robot_user: User = None
 
 
@@ -64,7 +66,7 @@ def daqui_a_30_dias() -> datetime.date:
 
 def convite_hash() -> str:
     """Gerar um hash ordenado de 8 caracteres"""
-    f = datetime.datetime.timestamp(datetime.datetime.utcnow())
+    f = datetime.datetime.timestamp(DateTimeProvider.now())
     return hex(struct.unpack("<I", struct.pack("<f", f))[0])[2:].upper()
 
 
@@ -75,7 +77,9 @@ def get_robot_user():
     robot_username = "planetapeia"
     if robot_user := User.objects.filter(username=robot_username).first():
         return robot_user
-    robot_user = User.objects.create_superuser(username=robot_username)
+    robot_user = User.objects.create_superuser(
+        username=robot_username, first_name="🤖 Planetabot"
+    )
     logging.info("Created robot user: %s", robot_user)
     return robot_user
 

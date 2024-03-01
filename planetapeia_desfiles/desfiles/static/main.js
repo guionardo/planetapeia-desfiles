@@ -45,3 +45,10 @@ function postLocalization() {
 
 
 // window.onload = postLocalization
+
+// Toasts
+const toasts = document.getElementsByClassName("toast")
+for (let i = 0; i < toasts.length; i++) {
+    const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toasts[i])
+    toastBootstrap.show()
+}

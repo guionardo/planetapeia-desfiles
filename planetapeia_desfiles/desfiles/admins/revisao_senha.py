@@ -1,7 +1,7 @@
-import datetime
-
 from django.contrib import admin, messages
 from django.contrib.admin.filters import EmptyFieldListFilter
+
+from ..services.date_time_provider import DateTimeProvider
 
 
 @admin.action(description="Confirmar revisão(ões)")
@@ -11,7 +11,7 @@ def confirmar_revisao(modeladmin, request, queryset):
             messages.warning(request, str(revisao))
             continue
         revisao.atendida_por = request.user
-        revisao.atendida_em = datetime.datetime.now()
+        revisao.atendida_em = DateTimeProvider.now()
 
         revisao.save()
         messages.success(request, str(revisao))

@@ -1,0 +1,8 @@
+{% load bs_toast_messages %}
+{% if messages %}
+    <div class="toast-container position-fixed top-5 end-0 p-3">
+        {% for message in messages %}
+            {% bs_toast message %}
+        {% endfor %}
+    </div>
+{% endif %}

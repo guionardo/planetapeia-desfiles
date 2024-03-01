@@ -7,12 +7,14 @@ from .perfil_foto_view import FotoView
 from .perfil_meus_convites import MeusConvitesView
 from .perfil_revisar_senha_view import RevisarSenha
 from .perfil_view import PerfilView
+from .perfil_mensagens import MensagensView
 
 paths = [
     path("perfil", PerfilView.as_view(), name="perfil"),
     path("perfil/editar", EditarView.as_view(), name="perfil_editar"),
     path("perfil/senha", AlterarSenhaView.as_view(), name="perfil_senha"),
     path("perfil/foto", FotoView.as_view(), name="perfil_foto"),
+    path("perfil/mensagens", MensagensView.as_view(), name="perfil_mensagens"),
     re_path(
         r"^perfil/revisar_senha/(?P<cpf>[0-9]{11})/$",
         RevisarSenha.as_view(),

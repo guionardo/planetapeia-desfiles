@@ -1,0 +1,46 @@
+{% extends "base/bootstrap.html" %}
+{% block content %}
+    <div class="col-lg-12 px-0">
+        <form method="post">
+            {% csrf_token %}
+            <table class="table table-hover">
+                <caption>{{ navbar.user_messages|length }} mensagen(s)</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Seleção</th>
+                        <th scope="col">Quando</th>
+                        <th scope="col">De</th>
+                        <th scope="col">Título</th>
+                        <th scope="col">Mensagem</th>
+                        <th scope="col">Lida em</th>
+                        <th scope="col">Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for message in navbar.user_messages %}
+                        <tr class="table-{{ message.class_color }}">
+                            <td>
+                                {% if message.pk %}
+                                    <input type="checkbox"
+                                           {% if message.read_at %}checked{% endif %}
+                                           name="msg_{{ message.pk }}">
+                                {% endif %}
+                            </td>
+                            <td>{{ message.when }}</td>
+                            <td>{{ message.user_from.get_full_name }}</td>
+                            <td>{{ message.title }}</td>
+                            <td>{{ message.message }}</td>
+                            <td>
+                                {% if message.read_at %}{{ message.read_at }}{% endif %}
+                            </td>
+                            <td>
+                                {% if message.link %}<a class="btn btn-outline-primary btn-sm" href="{{ message.link }}">Link</a>{% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary">Atualizar</button>
+        </form>
+    </div>
+{% endblock content %}

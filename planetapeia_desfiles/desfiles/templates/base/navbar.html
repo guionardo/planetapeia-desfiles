@@ -1,7 +1,7 @@
 {% if navbar %}
-    <nav class="navbar navbar-expand-lg bg-body-tertiary bg-dark border-bottom border-body" data-bs-theme="dark"">
+    <nav class="{{ navbar.nav_classes }}" data-bs-theme="dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Planetapéia</a>
+            <a class="navbar-brand" href="{% url 'home' %}">{{ navbar.brand }}</a>
             <button class="navbar-toggler"
                     type="button"
                     data-bs-toggle="collapse"
@@ -20,11 +20,14 @@
                                role="button"
                                data-bs-toggle="dropdown"
                                aria-expanded="false">
-                                <img src="{{ navbar.get_foto }}"
-                                     alt="mdo"
-                                     width="32"
-                                     height="32"
-                                     class="rounded-circle">
+                                {% if navbar.get_foto %}
+                                    <img src="{{ navbar.get_foto }}"
+                                         alt="mdo"
+                                         width="32"
+                                         height="32"
+                                         class="rounded-circle">
+                                {% endif %}
+                                <span>{{ navbar.get_name }}</span>
                             </a>
                             <ul class="dropdown-menu">
                                 {% for link in navbar.userlinks %}
@@ -32,7 +35,7 @@
                                         {% if link.divider %}
                                             <hr class="dropdown-divider">
                                         {% elif link.disabled %}
-                                            <a class="dropdown-item disabled" aria-disabled="true">{{ link.label }}</a>
+                                            <h6 class="dropdown-header">{{ link.label }}</h6>
                                         {% elif link.active %}
                                             <a class="dropdown-item active"
                                                aria-current="page"
@@ -48,30 +51,20 @@
                     {% endif %}
                 </ul>
             </div>
-            <div>
-                {% if navbar.user_messages %}
-                    <ul class="navbar-nav me-auto my-2 my-lg-0">
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle"
-                               href="#"
-                               role="button"
-                               data-bs-toggle="dropdown"
-                               title="Mensagens para o usuário"
-                               aria-expanded="false"> <i class="bi {{ navbar.user_messages_badge_icon }}"></i> <span class="badge {{ navbar.user_messages_badge_color }}">{{ navbar.user_messages|length }}</span> </a>
-                            <ul class="dropdown-menu">
-                                {% for msg in navbar.user_messages %}
-                                    <li>
-                                        <a class="dropdown-item"
-                                           href="{{ msg.full_link }}"
-                                           title="{{ msg.title }}">{{ msg.message }}</a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                    </ul>
-                {% endif %}
-            </div>
-            <span class="navbar-text"  title="Atualização {{ navbar.version_date }}">v{{ navbar.version }}</span>
+            {% if navbar.user_messages %}
+                <div>
+                    <ul class="nav">
+                    <a class="nav-link"
+                       href="{% url 'perfil_mensagens' %}"
+                       title="Mensagens para o usuário"><i class="bi {{ navbar.user_messages_badge_icon }}"></i>
+                    <span class="badge {{ navbar.user_messages_badge_color }}">{{ navbar.message_count_unreaden }}</span></a>
+            </ul>
         </div>
-    </nav>
+    {% endif %}
+    <span class="navbar-text mx-2"
+          title="Localização: {{ navbar.localizacao }}"><i class="bi bi-globe"></i></span>
+    <span class="navbar-text mx-2"
+          title="Atualização {{ navbar.version_date }}">v{{ navbar.version }}</span>
+</div>
+</nav>
 {% endif %}

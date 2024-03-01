@@ -1,10 +1,9 @@
-import datetime
-
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.http.request import HttpRequest
 
 from ..models import Desfile
+from ..services.date_time_provider import DateTimeProvider
 
 
 class DesfileAdmin(admin.ModelAdmin):
@@ -37,6 +36,6 @@ class DesfileAdmin(admin.ModelAdmin):
     def save_model(self, request, obj: Desfile, form, change) -> None:
         if obj.confirmado and not obj.aprovador:
             obj.aprovador = request.user
-            obj.data_aprovacao = datetime.datetime.now()
+            obj.data_aprovacao = DateTimeProvider.now()
 
         return super().save_model(request, obj, form, change)

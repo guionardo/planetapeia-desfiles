@@ -12,9 +12,7 @@ from ..utils import HttpEncryptedRedirectResponse, NavBar
 
 
 class CadastroPessoaView(TemplateView):
-    template_name = (
-        "perfil/perfil_form.html"  # TODO: Migrat template para perfil_form.html
-    )
+    template_name = "perfil/perfil_form.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         query = HttpEncryptedRedirectResponse.get_data(request) or {}

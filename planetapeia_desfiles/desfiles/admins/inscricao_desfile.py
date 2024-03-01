@@ -1,11 +1,11 @@
-from datetime import datetime
+from collections import defaultdict
 
 from django.contrib import admin, messages
 from django.urls import reverse
 
 from ..models import AprovacaoChoices
+from ..services.date_time_provider import DateTimeProvider
 from ..services.user_messages import UserMessages
-from collections import defaultdict
 
 
 @admin.action(description="Aprovar")
@@ -15,7 +15,7 @@ def aprovar_inscricao(modeladmin, request, queryset):
         if inscricao.aprovacao == AprovacaoChoices.REJEITADO:
             if inscricao.aprovador == request.user:
                 inscricao.aprovacao = AprovacaoChoices.APROVADO
-                inscricao.data_aprovacao = datetime.now()
+                inscricao.data_aprovacao = DateTimeProvider.now()
                 inscricao.save()
                 messages.success(request, str(inscricao))
             else:
@@ -23,7 +23,7 @@ def aprovar_inscricao(modeladmin, request, queryset):
                 outros_aprovadores[inscricao.aprovador].append(inscricao)
         elif inscricao.aprovacao == AprovacaoChoices.PENDENTE:
             inscricao.aprovacao = AprovacaoChoices.APROVADO
-            inscricao.data_aprovacao = datetime.now()
+            inscricao.data_aprovacao = DateTimeProvider.now()
             inscricao.aprovador = request.user
             inscricao.save()
             messages.success(request, str(inscricao))

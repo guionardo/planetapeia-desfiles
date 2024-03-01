@@ -17,3 +17,7 @@ def use_genero(
     if request.pessoa:
         return f"{prefixo}{sufixo_masc if request.pessoa.genero==GenerosChoices.MASCULINO else sufixo_fem}"
     return f"{prefixo}{sufixo_masc}"
+
+
+def use_plural(quantidade: int, singular: str, plural: str) -> str:
+    return singular if quantidade == 1 else plural

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "planetapeia-desfiles"
-version = "0.1.4"
+version = "0.1.5"
 description = "Sistema de gestão de desfiles do Planetapeia"
 authors = ["Guionardo <guionardo@gmail.com>"]
 license = "MIT"

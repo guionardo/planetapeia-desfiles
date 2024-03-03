@@ -91,3 +91,21 @@ def default_user_password(
         data_nascimento = datetime.datetime.strptime(data_nascimento, "%Y-%m-%d").date()
     iniciais = "".join(w[0] for w in nome.upper().split(" ") if w)
     return f"{iniciais}{cpf[-4:]}{data_nascimento.year}"
+
+
+def get_pessoa_name(quem) -> str:
+    """Obtém o nome da pessoa ou usuário informado"""
+    from .models import Pessoa
+
+    if isinstance(quem, Pessoa):
+        user = quem.get_user()
+        name = user.get_username()
+    elif isinstance(quem, User):
+        user = quem
+        name = quem.get_full_name() or quem.get_username()
+    else:
+        raise ValueError(f"Esperado Pessoa ou User, obtido {quem.__class__}: {quem}")
+
+    if not user.is_active:
+        return "anônimo"
+    return ("🦸 " if user.is_superuser else "🧑🏻‍💻 " if user.is_staff else "") + name

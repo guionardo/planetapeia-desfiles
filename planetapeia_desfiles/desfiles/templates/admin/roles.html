@@ -1,0 +1,45 @@
+{% extends "base/bootstrap.html" %}
+{% block content %}
+    <div class="col-lg-8 px-0">
+        <form method="post">
+            {% csrf_token %}
+            <table class="table table-hover">
+                <caption>{{ navbar.user|length }} usuários(s)</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Usuário</th>
+                        <th scope="col">Ativo</th>
+                        {% for role in roles_desc %}<th scope="col">{{ role }}</th>{% endfor %}
+                        <!-- <th scope="col">Quando</th>
+                        <th scope="col">De</th>
+                        <th scope="col">Título</th>
+                        <th scope="col">Mensagem</th>
+                        <th scope="col">Lida em</th>
+                        <th scope="col">Link</th> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.user_name }}</td>
+                            <td>
+                                <input type="checkbox"
+                                       {% if user.is_active %}checked{% endif %}
+                                       name="{{ user.pk }}_is_active">
+                            </td>
+                            {% for role in user.roles %}
+                                <td>
+                                    <input type="checkbox"
+                                           {% if role or user.is_superuser %}checked{% endif %}
+                                           name="{{ user.pk }}_{{ forloop.counter }}"
+                                           {% if user.is_superuser %}disabled{% endif %}>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary">Atualizar</button>
+        </form>
+    </div>
+{% endblock content %}

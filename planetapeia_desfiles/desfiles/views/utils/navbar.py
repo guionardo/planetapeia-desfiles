@@ -7,6 +7,7 @@ from django.urls import reverse
 
 from ...services.user_messages import UserMessageLevelChoices, UserMessages
 from ...version import __VERSION__, __VERSION_DATE__
+from ... import roles
 
 
 @dataclass
@@ -107,7 +108,10 @@ class NavBar:
             ]
         )
         if self.user.is_staff:
-            links.extend([Link("-"), Link("Administração", "admin:index")])
+            links.append(Link("-"))
+            if self.user.has_perm(roles.ADM_PESSOAS):
+                links.append(Link("Gestão de pessoas", "admin_roles"))
+            links.extend([Link("Administração", "admin:index")])
 
         links.extend(
             [

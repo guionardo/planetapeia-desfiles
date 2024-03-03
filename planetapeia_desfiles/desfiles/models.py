@@ -20,6 +20,7 @@ from .models_utils import (
     get_robot_user,
 )
 from .services.face_recognition import get_face_image
+from . import roles
 
 
 class GenerosChoices(models.TextChoices):
@@ -194,7 +195,7 @@ class Pessoa(models.Model):
         _ = self.get_user()
 
     class Meta:
-        permissions = [("pode_convidar", "Pode convidar")]
+        permissions = roles.pessoa_roles
 
 
 class Veiculo(models.Model):

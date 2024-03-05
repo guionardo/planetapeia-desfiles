@@ -1,9 +1,10 @@
 import base64
-import pickle
 from typing import Any
 from urllib.parse import urlencode
 
 from django.http import HttpRequest, HttpResponseRedirect
+
+from .simple_pickle import dumps, loads
 
 
 class HttpEncryptedRedirectResponse(HttpResponseRedirect):
@@ -47,11 +48,11 @@ class HttpEncryptedRedirectResponse(HttpResponseRedirect):
 
     @classmethod
     def encrypt_dict(cls, data) -> str:
-        return base64.b64encode(pickle.dumps(data)).decode()
+        return base64.b64encode(dumps(data)).decode()
 
     @classmethod
     def decrypt_dict(cls, encrypted_data: str) -> Any:
-        return pickle.loads(base64.b64decode(encrypted_data))
+        return loads(base64.b64decode(encrypted_data))
 
     @classmethod
     def get_data(cls, request: HttpRequest) -> dict | None:

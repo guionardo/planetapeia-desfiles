@@ -2,7 +2,7 @@ from typing import Any
 from django.contrib import admin
 from django.http import HttpRequest
 
-from ..models import TrajeHistorico, TrajeInventario
+from ..models import TrajeHistorico, TrajeInventario, TrajeMovimentoChoices
 
 
 class TrajeInventarioInline(admin.TabularInline):
@@ -22,6 +22,7 @@ class TrajeHistoricoInline(admin.TabularInline):
     extra = 0
     fields = ["data", "movimento", "obs", "usuario", "pessoa"]
     readonly_fields = ["data"]
+    show_change_link = True
 
     def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
@@ -53,6 +54,7 @@ class TrajeInventarioAdmin(admin.ModelAdmin):
         "ultima_atualizacao",
     ]
     readonly_fields = ["situacao", "ultima_atualizacao", "usuario", "pessoa"]
+    show_change_link = True
 
     def get_readonly_fields(
         self, request: HttpRequest, obj: Any | None = ...
@@ -61,3 +63,35 @@ class TrajeInventarioAdmin(admin.ModelAdmin):
         if obj.id:
             readonly_fields.extend(["num_inventario", "traje", "tamanho"])
         return readonly_fields
+
+
+class TrajeHistoricoAdmin(admin.ModelAdmin):
+    list_display = ["traje", "data", "get_situacao", "get_checklist"]
+    list_filter = ["traje"]
+    ordering = ["traje", "data"]
+
+    @admin.display(description="Situação")
+    def get_situacao(self, obj: TrajeHistorico) -> str:
+        match obj.movimento:
+            case TrajeMovimentoChoices.ENTRADA:
+                return "Entrada"
+            case TrajeMovimentoChoices.EMPRESTIMO:
+                return f"Empréstimo para {obj.pessoa}"
+            case TrajeMovimentoChoices.DEVOLUCAO:
+                return "Devolvido"
+            case TrajeMovimentoChoices.DESCARTE:
+                return "Descartado"
+            case TrajeMovimentoChoices.MANUTENCAO:
+                return "Enviado para manutenção"
+
+        return "Não sei ainda"
+
+    @admin.display(description="Checagem")
+    def get_checklist(self, obj: TrajeHistorico) -> str:
+        if obj.movimento not in [
+            TrajeMovimentoChoices.EMPRESTIMO,
+            TrajeMovimentoChoices.DEVOLUCAO,
+        ]:
+            return ""
+
+        return ", ".join(str(check) for check in obj.checagem.all())

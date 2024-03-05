@@ -15,4 +15,4 @@ class DateTimeProvider:
 
     @classmethod
     def today(cls) -> date:
-        return cls.with_timezone(date.today()).date()
+        return cls.with_timezone(datetime.now()).date()

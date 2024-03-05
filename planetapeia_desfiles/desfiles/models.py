@@ -275,6 +275,18 @@ class Desfile(models.Model):
     data_aprovacao = models.DateTimeField(
         verbose_name="Data aprovação", blank=True, null=True
     )
+    obs: str = models.TextField(
+        verbose_name="Observações",
+        max_length=512,
+        default="",
+        help_text="Observações internas do desfile",
+    )
+    obs_convidado: str = models.TextField(
+        verbose_name="Observações para o convidado",
+        max_length=512,
+        default="",
+        help_text="Observações que serão adicionadas ao convite e mostradas no painel do convidado",
+    )
 
     def __str__(self) -> str:
         return f"{self.nome} em {self.local}: {self.data:%d/%m/%Y}"
@@ -348,6 +360,9 @@ class InscricaoDesfile(models.Model):
     grupo: Grupo = models.ForeignKey(
         Grupo, verbose_name="Grupo", on_delete=models.PROTECT, null=True, blank=True
     )
+    data_desfile: datetime.date = models.DateField(
+        verbose_name="Data do desfile", null=True, blank=True
+    )
 
     class Meta:
         unique_together = ("desfile", "pessoa")
@@ -359,6 +374,8 @@ class InscricaoDesfile(models.Model):
             and self.aprovacao == AprovacaoChoices.PENDENTE
         ):
             raise ValidationError("Estado de aprovação não pode ser pendente")
+        if self.aprovacao == AprovacaoChoices.APROVADO and not self.veiculo:
+            raise ValidationError("A inscrição para o desfile deve indicar um veículo")
 
         self.is_cleaned = True
         return super().clean()
@@ -366,6 +383,8 @@ class InscricaoDesfile(models.Model):
     def save(self, *args, **kwargs) -> None:
         if not self.is_cleaned:
             self.clean()
+
+        self.data_desfile = self.desfile.data
 
         return super().save(*args, **kwargs)
 
@@ -462,7 +481,25 @@ class PessoaStaff(Pessoa):
             return padrao.staff_padrao_veiculo
 
 
+def extract_campos_checklist(campos_checklist: str) -> str:
+    linhas = [
+        linha.strip()
+        for linha in (campos_checklist or "").splitlines(keepends=False)
+        if linha.strip()
+    ]
+    return "\n".join(linhas)
+
+
+def campos_checklist_validator(value):
+    if not extract_campos_checklist(value):
+        raise ValidationError(
+            "Lista de verificação deve ter ao menos uma linha indicando um item a ser verificado"
+        )
+
+
 class Traje(models.Model):
+    is_cleaned = False
+
     nome: str = models.CharField(verbose_name="Nome", max_length=48)
     veiculo: Veiculo = models.ForeignKey(
         Veiculo, verbose_name="Veículo", blank=True, null=True, on_delete=models.PROTECT
@@ -470,9 +507,31 @@ class Traje(models.Model):
     genero: GenerosChoices = models.CharField(
         verbose_name="Gênero", max_length=1, choices=GenerosChoices
     )
+    campos_checklist: str = models.TextField(
+        verbose_name="Lista de verificação",
+        max_length=2048,
+        blank=True,
+        default="",
+        help_text="Cada linha é um ítem a ser verificado na entrega e devolução do traje",
+        validators=[campos_checklist_validator],
+    )
+
+    def clean(self):
+        if not extract_campos_checklist(self.campos_checklist):
+            raise ValidationError(
+                "Lista de verificação deve ter ao menos uma linha indicando um item a ser verificado"
+            )
+        self.is_cleaned = True
 
     def __str__(self) -> str:
         return self.nome + (f" ({self.veiculo})" if self.veiculo else "")
+
+    def save(self, *args, **kwargs) -> None:
+        if not self.is_cleaned:
+            self.clean()
+
+        self.campos_checklist = extract_campos_checklist(self.campos_checklist)
+        return super().save(*args, **kwargs)
 
 
 class TrajeInventario(models.Model):
@@ -548,9 +607,44 @@ class TrajeHistorico(models.Model):
         null=True,
         blank=True,
     )
+    checagem = models.ManyToManyField(
+        "TrajeHistoricoChecklistItem", verbose_name="Checagem"
+    )
 
     def __str__(self) -> str:
-        return f"{self.traje}: {self.movimento}"
+        return f"{self.traje}: {self.get_movimento_display()}"
+
+    def update_checagem(self):
+        """Checagem deve ocorrer no momento do emprestimo e na devolução"""
+        if self.movimento in [
+            TrajeMovimentoChoices.EMPRESTIMO,
+            TrajeMovimentoChoices.DEVOLUCAO,
+        ]:
+            traje_checks = set(
+                extract_campos_checklist(self.traje.traje.campos_checklist).splitlines(
+                    False
+                )
+            )
+            # Procura por checks que não existem na lista esperada
+            if checks := self.checagem.filter(~models.Q(item__in=traje_checks)):
+                self.checagem.remove(checks)
+
+            # Procura por checks da lista que não estão na instância
+            checks = set(check.item for check in self.checagem.all())
+            novos_checks = traje_checks.difference(checks)
+            self.checagem.add(
+                *[
+                    TrajeHistoricoChecklistItem.objects.create(
+                        historico=self, item=check
+                    )
+                    for check in novos_checks
+                ]
+            )
+
+        else:
+            if checks := self.checagem.objects.all():
+                # Remover qualquer checagem anterior
+                self.checagem.remove(checks)
 
     def clean(self):
         # Verifica a situação do último histórico se for um insert
@@ -642,7 +736,9 @@ class TrajeHistorico(models.Model):
     def save(self, *args, **kwargs) -> None:
         if not self.is_cleaned:
             self.clean()
-        return super().save(*args, **kwargs)
+        result = super().save(*args, **kwargs)
+        self.update_checagem()
+        return result
 
     class Meta:
         verbose_name = "Histórico do traje"
@@ -691,6 +787,19 @@ class TrajeTaxa(models.Model):
         if self.situacao == TrajeSituacaoTaxa.PAGO:
             return "Paga"
         return "Abonada"
+
+
+class TrajeHistoricoChecklistItem(models.Model):
+    historico: TrajeHistorico = models.ForeignKey(
+        TrajeHistorico, verbose_name="Histórico", on_delete=models.PROTECT
+    )
+    item: str = models.CharField(
+        verbose_name="Item", max_length=40, blank=False, null=False
+    )
+    checado: bool = models.BooleanField(verbose_name="Checado", default=False)
+
+    def __str__(self):
+        return f"{self.item}: {'✅' if self.checado else '❌'}"
 
 
 class Convite(models.Model):

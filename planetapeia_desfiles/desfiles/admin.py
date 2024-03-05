@@ -6,7 +6,7 @@ from .admins.grupo import GrupoAdmin
 from .admins.inscricao_desfile import InscricaoDesfileAdmin
 from .admins.pessoa import PessoaAdmin
 from .admins.staff import StaffPadraoVeiculoAdmin, StaffsAdmin
-from .admins.traje import TrajeAdmin, TrajeInventarioAdmin
+from .admins.traje import TrajeAdmin, TrajeInventarioAdmin, TrajeHistoricoAdmin
 from .admins.user_messages import UserMessagesAdmin
 from .admins.veiculo import VeiculoAdmin
 from .admins.config import ConfigAdmin
@@ -27,6 +27,7 @@ from .models import (
     Veiculo,
     PessoaLocalizacao,
     PessoaRevisarSenha,
+    TrajeHistorico,
 )
 
 
@@ -49,5 +50,6 @@ admin.site.register(InscricaoDesfile, InscricaoDesfileAdmin)
 admin.site.register(UserMessage, UserMessagesAdmin)
 admin.site.register(PessoaRevisarSenha, RevisaoSenhaAdmin)
 
+admin.site.register(TrajeHistorico, TrajeHistoricoAdmin)
 admin.site.site_title = "Planetapéia Desfiles"
 admin.site.site_header = "Planetapéia Desfiles"

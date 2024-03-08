@@ -1,0 +1,29 @@
+<form method="post">
+    {% csrf_token %}
+    {% include "forms/busca_pessoa.html" with filtro="sem_trajes" changedPessoa="changedPessoa" %}
+    <input type="hidden" name="ops" value="traje_entrega" />
+    <div class="input-group mb-3">
+        <span class="input-group-text">Traje</span>
+        <span class="input-group-text" id="traje_desc">TRAJE</span>
+        <span class="input-group-text">Nº do inventário</span>
+        <input type="number"
+               class="form-control"
+               name="inventario"
+               id="INVENTARIO"
+               title="Informe o número do inventário"
+               disabled>
+    </div>
+    <button type="submit" class="btn btn-primary">Enviar</button>
+    <script>
+        const inputInventario = document.getElementById('INVENTARIO')
+        const trajeDesc = document.getElementById('traje_desc')
+        function changedPessoa(pessoa) {
+            debugger
+            inputInventario.setAttribute('disabled', '')
+            if (!pessoa) return;
+            trajeDesc.innerText = pessoa.traje
+            inputInventario.removeAttribute('disabled')
+            console.info('Pessoa', pessoa)
+        }
+    </script>
+</form>

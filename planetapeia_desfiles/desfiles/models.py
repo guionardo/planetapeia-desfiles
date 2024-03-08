@@ -10,17 +10,19 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.templatetags.static import static
 from django.urls import reverse
-from .services.date_time_provider import DateTimeProvider
+
+from . import roles
 from .models_utils import (
     convite_hash,
     cpf_validator,
     data_nascimento_validator,
     default_user_password,
-    upload_to,
     get_robot_user,
+    nome_pesquisavel,
+    upload_to,
 )
+from .services.date_time_provider import DateTimeProvider
 from .services.face_recognition import get_face_image
-from . import roles
 
 
 class GenerosChoices(models.TextChoices):
@@ -86,6 +88,9 @@ class Pessoa(models.Model):
     nome = models.CharField(
         verbose_name="Nome",
         max_length=60,
+    )
+    nome_busca = models.CharField(
+        verbose_name="Nome busca", max_length=60, editable=False, blank=True, null=True
     )
     telefone = models.CharField(verbose_name="Telefone", max_length=13)
     data_nascimento = models.DateField(
@@ -191,6 +196,7 @@ class Pessoa(models.Model):
         if not self.is_cleaned:
             self.clean()
 
+        self.nome_busca = nome_pesquisavel(self.nome)
         super().save(*args, **kwargs)
         _ = self.get_user()
 

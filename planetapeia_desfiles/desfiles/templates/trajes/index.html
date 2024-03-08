@@ -1,0 +1,82 @@
+{% extends "base/bootstrap.html" %}
+{% block content %}
+    <div class="col-lg-8 px-0">
+        <div class="accordion" id="accordionTrajes">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#colEntrega"
+                            aria-expanded="false"
+                            aria-controls="colEntrega">Entregar traje ao convidado</button>
+                </h2>
+                <div id="colEntrega"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#accordionTrajes">
+                    <div class="accordion-body">{% include "trajes/traje_entrega.html" %}</div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#colReceberConvidado"
+                            aria-expanded="false"
+                            aria-controls="colReceberConvidado">Receber traje do convidado</button>
+                </h2>
+                <div id="colReceberConvidado"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#accordionTrajes">
+                    <div class="accordion-body">{% include "trajes/traje_devolucao_convidado.html" %}</div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#colEnvioManut"
+                            aria-expanded="false"
+                            aria-controls="colEnvioManut">Enviar traje para manutenção</button>
+                </h2>
+                <div id="colEnvioManut"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#accordionTrajes">
+                    <div class="accordion-body">{% include "trajes/traje_envio_manut.html" %}</div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#colRecManut"
+                            aria-expanded="false"
+                            aria-controls="colRecManut">Receber traje da manutenção</button>
+                </h2>
+                <div id="colRecManut"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#accordionTrajes">
+                    <div class="accordion-body">{% include "trajes/traje_devolucao_manut.html" %}</div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#colExtravio"
+                            aria-expanded="false"
+                            aria-controls="colExtravio">Traje extraviado</button>
+                </h2>
+                <div id="colExtravio"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#accordionTrajes">
+                    <div class="accordion-body">{% include "trajes/traje_extraviado.html" %}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

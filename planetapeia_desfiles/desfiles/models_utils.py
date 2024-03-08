@@ -5,6 +5,7 @@ import struct
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from unidecode import unidecode
 
 from .services.date_time_provider import DateTimeProvider
 
@@ -109,3 +110,10 @@ def get_pessoa_name(quem) -> str:
     if not user.is_active:
         return "anônimo"
     return ("🦸 " if user.is_superuser else "🧑🏻‍💻 " if user.is_staff else "") + name
+
+
+def nome_pesquisavel(nome: str | None) -> str:
+    """Transforma um nome, retirando acentos e convertendo em minúsculas para facilitar a consulta"""
+    return " ".join(
+        [n.strip() for n in unidecode(nome or "").lower().split(" ") if n.strip()]
+    )

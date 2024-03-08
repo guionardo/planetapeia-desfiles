@@ -1,0 +1,81 @@
+<div class="input-group mb-3">
+    <input type="text"
+           id="buscaPessoaInput"
+           class="form-control"
+           placeholder="Nome ou CPF"
+           aria-label="Nome ou CPF">
+    <button class="btn btn-outline-secondary"
+            type="button"
+            id="button-addon2"
+            onclick="buscaPessoaClick()"
+            title="Buscar pessoa">
+        <i class="bi bi-search"></i>
+    </button>
+</div>
+<div class="input-group mb-3" id="buscaDiv">
+    <select class="form-select"
+            aria-label="Default select example"
+            id="selNomes"
+            name="cpf"
+            onchange="changePessoa(this)"></select>
+</div>
+<script>
+    const buscaDiv = document.getElementById('buscaDiv')
+    const buscaPessoaInput = document.getElementById('buscaPessoaInput')
+    const selNomes = document.getElementById('selNomes')
+    var pessoas = {}
+    async function buscaPessoaClick() {
+        if (!buscaPessoaInput.value) {
+            alert('Informe um CPF ou o nome da pessoa para buscar')
+            return
+        }
+
+        const nome = encodeURI(buscaPessoaInput.value)
+        const url = `{% url 'api_busca_pessoa' %}?nome=${nome}`
+
+        const response = await fetch(url)
+        var data = await response.json()
+        pessoas = data
+        if (data.count == 0) {
+            alert('Não encontrei nenhuma pessoa com esse nome!')
+            return
+        }
+
+        selNomes.innerHTML = ''
+        const selectFirst = document.createElement('option')
+        selectFirst.setAttribute('disabled', '')
+        selectFirst.setAttribute('selected', '')
+        selectFirst.innerHTML = {% if filtro == "sem_trajes" %}
+    'Somente pessoas sem trajes'
+    {% elif filtro == "com_trajes" %}
+    'Somente pessoas com trajes'
+    {% else %}
+    'Selecione uma pessoa'
+    {% endif %}
+    selNomes.appendChild(selectFirst)
+
+    for (let i = 0; i < data.count; i++) {
+        const select = document.createElement('option')
+        {% if filtro == "sem_trajes" %}
+        if (data.items[i].traje_inventario) {
+            select.setAttribute('disabled', '')
+        }
+        {% elif filtro == "com_trajes" %}
+        if (!data.items[i].traje_inventario) {
+            select.setAttribute('disabled', '')
+        }
+        {% endif %}
+        select.setAttribute('value', data.items[i].cpf)
+        select.innerHTML = data.items[i].nome + (data.items[i].traje_inventario ? ` :${data.items[i].traje_inventario_desc}` : '')
+        selNomes.appendChild(select)
+    }
+    }
+
+    function changePessoa(elm) {
+        const people = pessoas.items.filter(item => item.cpf == elm.value)
+        const pessoa = people.length > 0 ? people[0] : null
+        {% if changedPessoa %}
+        {{changedPessoa}}(pessoa)
+        {% endif %}
+    }
+</script>

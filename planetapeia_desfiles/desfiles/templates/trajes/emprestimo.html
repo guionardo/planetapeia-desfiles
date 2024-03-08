@@ -1,0 +1,32 @@
+{% extends "base/bootstrap.html" %}
+{% block content %}
+    <div class="col-lg-8 px-0">
+        <p class="fs-5">Preencha o CPF do convidado ou o número do inventário do traje para continuar</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <span class="input-group-text">Nome</span>
+                <span class="input-group-text">{{ pessoa.nome }}</span>
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">CPF</span>
+                <input type="text"
+                       class="form-control"
+                       name="cpf"
+                       id="CPF"
+                       maxlength="11"
+                       pattern="[0-9]{11}"
+                       title="Informe seu CPF usando apenas números">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Nº do inventário</span>
+                <input type="number"
+                       class="form-control"
+                       name="inventario"
+                       id="INVENTARIO"
+                       title="Informe seu CPF usando apenas números">
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+    </div>
+{% endblock content %}

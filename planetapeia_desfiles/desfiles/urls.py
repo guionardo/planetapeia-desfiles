@@ -1,4 +1,4 @@
-from .views import admin, auth, convite, home, perfil, root
+from .views import admin, api, auth, convite, home, perfil, root, trajes
 
 urlpatterns = [
     *root.paths,
@@ -7,4 +7,6 @@ urlpatterns = [
     *perfil.paths,
     *convite.paths,
     *admin.paths,
+    *trajes.paths,
+    *api.paths,
 ]

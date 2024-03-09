@@ -1,0 +1,21 @@
+{# Monta fields a partir do checklist : [{id:int,item:str,checado:bool}] #}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Checklist de entrega</h5>
+        {% for check in checklist %}
+            <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       value=""
+                       name="check_{{ check.id }}"
+                       {% if check.checado %}checked{% endif %}
+                       id="check_{{ check.id }}">
+                <label class="form-check-label" for="check_{{ check.id }}">{{ check.item }}</label>
+            </div>
+        {% endfor %}
+        <div class="mb-3">
+            <label for="taObs" class="form-label">Observações</label>
+            <textarea class="form-control" id="taObs" rows="3" name="obs"></textarea>
+        </div>
+    </div>
+</div>

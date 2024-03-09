@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
@@ -8,13 +9,10 @@ from ...models import (
     Pessoa,
     SituacaoTrajeChoices,
     TrajeInventario,
-    InscricaoDesfile,
-    AprovacaoChoices,
-    Traje,
 )
 from ...roles import ALMOXARIFE
+from ...services.trajes_service import TrajesService
 from ..utils import NavBar, get_post_data
-from ...services.date_time_provider import DateTimeProvider
 
 
 class TrajesIndex(LoginRequiredMixin, TemplateView):
@@ -32,61 +30,72 @@ class TrajesIndex(LoginRequiredMixin, TemplateView):
 
     def traje_entrega(self, request: HttpRequest, context: dict) -> HttpResponse:
         cpf, inventario = get_post_data(request, "cpf", "inventario")
-        if not (pessoa := Pessoa.objects.filter(pk=cpf).first()):
-            messages.warning(request, f"Não encontrei nenhuma pessoa com o CPF {cpf}")
-            return context
-        if not inventario:
-            messages.warning(request, "Número do inventário é obrigatório")
-            return context
-        if not (
-            traje_inventario := TrajeInventario.objects.filter(pk=inventario).first()
-        ):
-            messages.warning(
-                request,
-                f"Não encontrei nenhum traje inventariado sob o número {inventario}",
+        try:
+            _ = TrajesService.validar_entrega_traje(cpf, inventario)
+            return redirect(
+                "traje_emprestimo_checagem", num_inventario=inventario, pessoa_id=cpf
             )
-            return context
-        if traje_inventario.situacao != SituacaoTrajeChoices.DISPONIVEL:
-            messages.warning(
-                request,
-                f"O traje {traje_inventario} está {traje_inventario.get_situacao_display()}",
-            )
-            return context
 
-        if not (
-            inscricao := InscricaoDesfile.objects.filter(
-                pessoa=pessoa,
-                data_desfile__gte=DateTimeProvider.today(),
-                aprovacao=AprovacaoChoices.APROVADO,
-            ).first()
-        ):
-            messages.warning(
-                request, f"Não há inscrição aprovada em desfile para {pessoa}"
-            )
-            return context
-        if not (
-            traje := Traje.objects.filter(veiculo=inscricao.veiculo.veiculo).first()
-        ):
-            messages.warning(
-                request, f"Não encontrei o traje relacionado à inscrição {inscricao}"
-            )
-            return context
-        if traje.pk != traje_inventario.traje.pk:
-            messages.warning(
-                request,
-                f"A inscrição para o veículo {inscricao.veiculo.veiculo} pede o traje {traje} mas você selecionou o inventário {traje_inventario}",
-            )
-            return context
-        if traje_inventario.tamanho != pessoa.tamanho_traje:
-            messages.warning(
-                request,
-                f"{pessoa} está cadastrada com tamanho de traje {pessoa.get_tamanho_traje_display()} mas o inventário {traje_inventario} tem tamanho {traje_inventario.get_tamanho_display()}",
-            )
-            return context
+        except ValidationError as exc:
+            messages.warning(request, exc.messages[0])
 
-        # TODO: Verificar a cobrança antecipada do traje
-        # TODO: Implementar salvar a entrega do traje
-        return context
+        return self.render_to_response(context)
+
+        # if not (pessoa := Pessoa.objects.filter(pk=cpf).first()):
+        #     messages.warning(request, f"Não encontrei nenhuma pessoa com o CPF {cpf}")
+        #     return context
+        # if not inventario:
+        #     messages.warning(request, "Número do inventário é obrigatório")
+        #     return context
+        # if not (
+        #     traje_inventario := TrajeInventario.objects.filter(pk=inventario).first()
+        # ):
+        #     messages.warning(
+        #         request,
+        #         f"Não encontrei nenhum traje inventariado sob o número {inventario}",
+        #     )
+        #     return context
+        # if traje_inventario.situacao != SituacaoTrajeChoices.DISPONIVEL:
+        #     messages.warning(
+        #         request,
+        #         f"O traje {traje_inventario} está {traje_inventario.get_situacao_display()}",
+        #     )
+        #     return context
+
+        # if not (
+        #     inscricao := InscricaoDesfile.objects.filter(
+        #         pessoa=pessoa,
+        #         data_desfile__gte=DateTimeProvider.today(),
+        #         aprovacao=AprovacaoChoices.APROVADO,
+        #     ).first()
+        # ):
+        #     messages.warning(
+        #         request, f"Não há inscrição aprovada em desfile para {pessoa}"
+        #     )
+        #     return context
+        # if not (
+        #     traje := Traje.objects.filter(veiculo=inscricao.veiculo.veiculo).first()
+        # ):
+        #     messages.warning(
+        #         request, f"Não encontrei o traje relacionado à inscrição {inscricao}"
+        #     )
+        #     return context
+        # if traje.pk != traje_inventario.traje.pk:
+        #     messages.warning(
+        #         request,
+        #         f"A inscrição para o veículo {inscricao.veiculo.veiculo} pede o traje {traje} mas você selecionou o inventário {traje_inventario}",
+        #     )
+        #     return context
+        # if traje_inventario.tamanho != pessoa.tamanho_traje:
+        #     messages.warning(
+        #         request,
+        #         f"{pessoa} está cadastrada com tamanho de traje {pessoa.get_tamanho_traje_display()} mas o inventário {traje_inventario} tem tamanho {traje_inventario.get_tamanho_display()}",
+        #     )
+        #     return context
+
+        # # TODO: Verificar a cobrança antecipada do traje
+        # # TODO: Implementar salvar a entrega do traje
+        # return context
 
     def post(self, request: HttpRequest) -> HttpResponse:
         context = {
@@ -97,7 +106,7 @@ class TrajesIndex(LoginRequiredMixin, TemplateView):
 
         match ops:
             case "traje_entrega":
-                context = self.traje_entrega(request, context)
+                return self.traje_entrega(request, context)
 
             case _:
                 messages.error(request, "Operação inválida")

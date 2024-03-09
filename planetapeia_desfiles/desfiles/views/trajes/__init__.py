@@ -1,6 +1,7 @@
 """ Views de trajes """
 from django.urls import path
 
+from .trajes_emprestimo import TrajesEmprestimo
 from .trajes_index import TrajesIndex
 from .trajes_op import TrajesOp
 
@@ -23,6 +24,11 @@ paths = [
         TrajesOp.as_view(),
         {"op": "emprestimo"},
         name="traje_emprestimo",
+    ),
+    path(
+        "trajes/emprestimo/checagem/<int:num_inventario>/<str:pessoa_id>/",
+        TrajesEmprestimo.as_view(),
+        name="traje_emprestimo_checagem",
     ),
     path(
         "trajes/saida/<int:num_inventario>",

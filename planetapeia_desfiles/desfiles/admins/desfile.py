@@ -11,6 +11,7 @@ class DesfileAdmin(admin.ModelAdmin):
         "nome",
         ("local", "data"),
         ("confirmado", "data_aprovacao", "aprovador"),
+        "situacao",
         "veiculos",
     ]
 
@@ -19,7 +20,14 @@ class DesfileAdmin(admin.ModelAdmin):
         if obj and obj.confirmado:
             confirmado.extend(["data_aprovacao", "aprovador"])
         # confirmado.append("aprovador")
-        fields = ["nome", ("local", "data"), "confirmado", confirmado, "veiculos"]
+        fields = [
+            "nome",
+            ("local", "data"),
+            "confirmado",
+            confirmado,
+            "situacao",
+            "veiculos",
+        ]
         return fields
 
     def get_readonly_fields(self, request, obj: Desfile):

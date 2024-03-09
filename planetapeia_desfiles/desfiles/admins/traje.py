@@ -69,6 +69,17 @@ class TrajeHistoricoAdmin(admin.ModelAdmin):
     list_display = ["traje", "data", "get_situacao", "get_checklist"]
     list_filter = ["traje"]
     ordering = ["traje", "data"]
+    fields = ["traje", "data", "movimento", "usuario", "pessoa", "checagem", "obs"]
+
+    def get_readonly_fields(
+        self, request: HttpRequest, obj: TrajeHistorico | None = None
+    ):
+        readonly_fields = []
+        if obj.pk:
+            readonly_fields.extend(
+                ["movimento", "data", "traje", "pessoa", "checagem", "obs", "usuario"]
+            )
+        return readonly_fields
 
     @admin.display(description="Situação")
     def get_situacao(self, obj: TrajeHistorico) -> str:

@@ -1,31 +1,22 @@
 {% extends "base/bootstrap.html" %}
 {% block content %}
     <div class="col-lg-8 px-0">
-        <p class="fs-5">Preencha o CPF do convidado ou o número do inventário do traje para continuar</p>
+        <p class="fs-5">Registro de empréstimo de traje</p>
         <form method="post">
             {% csrf_token %}
             <div class="input-group mb-3">
                 <span class="input-group-text">Nome</span>
-                <span class="input-group-text">{{ pessoa.nome }}</span>
+                <span class="input-group-text">{{ pessoa.nome }} ({{ pessoa.cpf }})</span>
             </div>
             <div class="input-group mb-3">
-                <span class="input-group-text">CPF</span>
-                <input type="text"
-                       class="form-control"
-                       name="cpf"
-                       id="CPF"
-                       maxlength="11"
-                       pattern="[0-9]{11}"
-                       title="Informe seu CPF usando apenas números">
+                <span class="input-group-text">Desfile</span>
+                <span class="input-group-text">{{ desfile }}</span>
             </div>
             <div class="input-group mb-3">
-                <span class="input-group-text">Nº do inventário</span>
-                <input type="number"
-                       class="form-control"
-                       name="inventario"
-                       id="INVENTARIO"
-                       title="Informe seu CPF usando apenas números">
+                <span class="input-group-text">Traje</span>
+                <span class="input-group-text">{{ traje_inventario }}</span>
             </div>
+            {% include "trajes/checagem.html" %}
             <button type="submit" class="btn btn-primary">Enviar</button>
         </form>
     </div>

@@ -1,107 +1,61 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.exceptions import ValidationError
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
-from ...models import (
-    AprovacaoChoices,
-    InscricaoDesfile,
-    Pessoa,
-    SituacaoTrajeChoices,
-    Traje,
-    TrajeInventario,
-)
 from ...roles import ALMOXARIFE
-from ...services.date_time_provider import DateTimeProvider
+from ...services.trajes_service import TrajesService
 from ..utils import NavBar, get_post_data
 
 
-class TrajesEmprestimo(LoginRequiredMixin, TemplateView):
+class TrajesEmprestimo(PermissionRequiredMixin, LoginRequiredMixin, TemplateView):
     template_name = "trajes/emprestimo.html"
+    permission_required = ALMOXARIFE
 
     def get(
         self, request: HttpRequest, num_inventario: int, pessoa_id: str
     ) -> HttpResponse:
-        if not request.user.has_perm(ALMOXARIFE):
-            return HttpResponseForbidden()
-        if not (pessoa := Pessoa.objects.filter(pk=pessoa_id).first()):
-            messages.warning(
-                request, f"Não foi encontrada uma pessoa com CPF {pessoa_id}"
-            )
+        try:
+            (
+                traje_inventario,
+                pessoa,
+                inscricao_desfile,
+            ) = TrajesService.validar_entrega_traje(pessoa_id, num_inventario)
+            context = {
+                "header": "Empréstimo de traje",
+                "navbar": NavBar(request),
+                "pessoa": pessoa,
+                "desfile": inscricao_desfile.desfile,
+                "traje_inventario": traje_inventario,
+                "checklist": [
+                    {"id": index, "item": item, "checado": bool}
+                    for index, item in enumerate(traje_inventario.get_checklist_itens())
+                ],
+            }
+            return self.render_to_response(context)
+        except ValidationError as exc:
+            messages.warning(request, exc.messages[0])
             return redirect("trajes_index")
-
-        if not (
-            inscricao := InscricaoDesfile.objects.filter(
-                pessoa=pessoa,
-                aprovacao=AprovacaoChoices.APROVADO,
-                data_desfile__gte=DateTimeProvider.today(),
-            ).first()
-        ):
-            messages.warning(
-                request,
-                f"Não foi encontrada nenhuma inscrição para desfile aprovada para {pessoa}",
-            )
-            return redirect("trajes_index")
-
-        if not (
-            traje := Traje.objects.filter(
-                veiculo=inscricao.veiculo, genero=pessoa.genero
-            ).first()
-        ):
-            messages.warning(
-                request,
-                f"Não foi encontrado nenhum traje {pessoa.get_genero_display()} para {inscricao.veiculo}",
-            )
-            return redirect("trajes_index")
-
-        if not (
-            inventarios := TrajeInventario.objects.filter(
-                traje=traje,
-                tamanho=pessoa.tamanho_traje,
-                situacao=SituacaoTrajeChoices.DISPONIVEL,
-            ).all()
-        ):
-            messages.warning(
-                request,
-                f"Não há trajes {pessoa.get_genero_display()} para {inscricao.veiculo} no tamanho {pessoa.get_tamanho_traje_display()} disponíveis",
-            )
-            return redirect("trajes_index")
-
-        context = {
-            "header": "Empréstimo de traje",
-            "navbar": NavBar(request),
-            "pessoa": pessoa,
-            "inventarios": inventarios,
-        }
-
-        if num_inventario:
-            if traje := TrajeInventario.objects.filter(pk=num_inventario).first():
-                trajes = [traje]
-            else:
-                trajes = []
-        else:
-            # Localizar trajes disponíveis para a pessoa
-            trajes = TrajeInventario.objects.filter(
-                # traje__traje__genero=pessoa.genero,
-                # traje__tamanho=pessoa.tamanho_traje,
-                situacao=SituacaoTrajeChoices.DISPONIVEL,
-            ).all()
-
-        # TODO: Implementar validação dos trajes disponíveis para o tamanho da pessoa,
-        context["trajes"] = trajes
-        return self.render_to_response(context)
 
     def post(
         self, request: HttpRequest, num_inventario: int, pessoa_id: str
     ) -> HttpResponse:
-        if not request.user.has_perm(ALMOXARIFE):
-            return HttpResponseForbidden()
-        cpf, inventario = get_post_data(request, "cpf", "inventario")
-        context = {
-            "header": "Gerenciamento de trajes",
-            "navbar": NavBar(request),
-        }
-        # TODO: Implementar atualização do inventário: empréstimo
+        cpf, inventario, obs = get_post_data(request, "cpf", "inventario", "obs")
+        (
+            traje_inventario,
+            pessoa,
+            inscricao_desfile,
+        ) = TrajesService.validar_entrega_traje(pessoa_id, num_inventario)
+        checklist = [
+            (item, request.POST.get(f"check_{index}") is not None)
+            for index, item in enumerate(traje_inventario.get_checklist_itens())
+        ]
 
-        return self.render_to_response(context)
+        traje_historico = TrajesService.entregar_traje(
+            traje_inventario, pessoa, request.user, obs, checklist
+        )
+        messages.success(request, f"{traje_historico}")
+
+        return redirect("trajes_index")

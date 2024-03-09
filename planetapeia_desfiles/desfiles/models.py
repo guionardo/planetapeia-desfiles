@@ -263,6 +263,13 @@ class Grupo(models.Model):
         return self.nome
 
 
+class SituacaoDesfileChoices(models.TextChoices):
+    ABERTO = "A", "Aberto"
+    CONFIRMADO = "C", "Confirmado"
+    CANCELADO = "X", "Cancelado"
+    TERMINADO = "T", "Terminado"
+
+
 class Desfile(models.Model):
     is_cleaned = False
 
@@ -294,6 +301,13 @@ class Desfile(models.Model):
         help_text="Observações que serão adicionadas ao convite e mostradas no painel do convidado",
     )
 
+    situacao = models.CharField(
+        verbose_name="Situação",
+        max_length=1,
+        choices=SituacaoDesfileChoices,
+        default=SituacaoDesfileChoices.ABERTO,
+    )
+
     def __str__(self) -> str:
         return f"{self.nome} em {self.local}: {self.data:%d/%m/%Y}"
 
@@ -309,8 +323,10 @@ class Desfile(models.Model):
         if not self.confirmado:
             self.aprovador = None
             self.data_aprovacao = None
+            self.situacao = SituacaoDesfileChoices.ABERTO
         elif not self.data_aprovacao:
             self.data_aprovacao = DateTimeProvider.now()
+            self.situacao = SituacaoDesfileChoices.CONFIRMADO
 
         return super().save(*args, **kwargs)
 
@@ -575,6 +591,26 @@ class TrajeInventario(models.Model):
     def __str__(self) -> str:
         return f"#{self.num_inventario} {self.traje}"
 
+    def get_checklist_itens(self) -> list[str]:
+        traje_checks = set(
+            extract_campos_checklist(self.traje.campos_checklist).splitlines(False)
+        )
+        return list(traje_checks)
+
+    def situacao_str(self) -> str:
+        """Descrição da situação atual do traje"""
+        match self.situacao:
+            case SituacaoTrajeChoices.DISPONIVEL:
+                return f"{self} : Disponível"
+            case SituacaoTrajeChoices.EMPRESTADO:
+                return f"{self} : Emprestado a {self.pessoa}"
+            case SituacaoTrajeChoices.MANUTENCAO:
+                return f"{self} : Em manutenção"
+            case SituacaoTrajeChoices.EXTRAVIADO:
+                return f"{self} : Extraviado"
+            case SituacaoTrajeChoices.DESCARTADO:
+                return f"{self} : Descartado"
+
     def save(self, *args, **kwargs) -> None:
         criar_entrada = not self.id
         super().save(*args, **kwargs)
@@ -599,7 +635,7 @@ class TrajeHistorico(models.Model):
     data: datetime.datetime = models.DateTimeField(
         verbose_name="Data", auto_now_add=True
     )
-    obs: str = models.CharField(verbose_name="Observações", max_length=120, default="")
+    obs: str = models.TextField(verbose_name="Observações", max_length=120, default="")
     movimento: TrajeMovimentoChoices = models.CharField(
         verbose_name="Movimento", max_length=1, choices=TrajeMovimentoChoices
     )
@@ -619,6 +655,14 @@ class TrajeHistorico(models.Model):
 
     def __str__(self) -> str:
         return f"{self.traje}: {self.get_movimento_display()}"
+
+    def get_checklist_itens(self) -> list[str]:
+        traje_checks = set(
+            extract_campos_checklist(self.traje.traje.campos_checklist).splitlines(
+                False
+            )
+        )
+        return list(traje_checks)
 
     def update_checagem(self):
         """Checagem deve ocorrer no momento do emprestimo e na devolução"""

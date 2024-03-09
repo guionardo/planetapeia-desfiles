@@ -35,3 +35,7 @@ class PessoaService:
             self.logger.info("Pessoa não identificada para o user %s", self.user)
         finally:
             self.logger.info("REQUEST USER = %s | PESSOA = %s", self.user, self.pessoa)
+
+    @classmethod
+    def get_pessoa(cls, cpf: str) -> Pessoa | None:
+        return Pessoa.objects.filter(pk=str(cpf)).first()

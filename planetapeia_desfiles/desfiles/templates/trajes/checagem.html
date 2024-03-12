@@ -2,6 +2,13 @@
 <div class="card">
     <div class="card-body">
         <h5 class="card-title">Checklist de entrega</h5>
+        <h6 class="card-subtitle mb-2 text-body-secondary">
+            {% if checklist_instrucao %}
+                {{ checklist_instrucao }}
+            {% else %}
+                Assinale os itens recebidos
+            {% endif %}
+        </h6>
         {% for check in checklist %}
             <div class="form-check">
                 <input class="form-check-input"

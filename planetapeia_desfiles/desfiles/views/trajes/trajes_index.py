@@ -11,7 +11,7 @@ from ...models import (
     TrajeInventario,
 )
 from ...roles import ALMOXARIFE
-from ...services.trajes_service import TrajesService
+from ...services import trajes_service
 from ..utils import NavBar, get_post_data
 
 
@@ -31,7 +31,7 @@ class TrajesIndex(LoginRequiredMixin, TemplateView):
     def traje_entrega(self, request: HttpRequest, context: dict) -> HttpResponse:
         cpf, inventario = get_post_data(request, "cpf", "inventario")
         try:
-            _ = TrajesService.validar_entrega_traje(cpf, inventario)
+            _ = trajes_service.validar_entrega_traje(cpf, inventario)
             return redirect(
                 "traje_emprestimo_checagem", num_inventario=inventario, pessoa_id=cpf
             )
@@ -41,6 +41,20 @@ class TrajesIndex(LoginRequiredMixin, TemplateView):
 
         return self.render_to_response(context)
 
+    def traje_entrega_pessoa(self, request: HttpRequest, context: dict) -> HttpResponse:
+        return redirect("trajes_entrega_pessoa", cpf=request.POST.get("cpf"))
+
+    def traje_devolucao_convidado(
+        self, request: HttpRequest, context: dict
+    ) -> HttpResponse:
+        inventario = request.POST.get("inventario")
+        try:
+            _ = trajes_service.validar_devolucao_traje(inventario)
+            return redirect("traje_devolucao", num_inventario=inventario)
+        except ValidationError as exc:
+            messages.warning(request, exc.messages[0])
+
+        return self.render_to_response(context)
         # if not (pessoa := Pessoa.objects.filter(pk=cpf).first()):
         #     messages.warning(request, f"Não encontrei nenhuma pessoa com o CPF {cpf}")
         #     return context
@@ -107,7 +121,10 @@ class TrajesIndex(LoginRequiredMixin, TemplateView):
         match ops:
             case "traje_entrega":
                 return self.traje_entrega(request, context)
-
+            case "traje_devolucao_convidado":
+                return self.traje_devolucao_convidado(request, context)
+            case "traje_entrega_pessoa":
+                return self.traje_entrega_pessoa(request, context)
             case _:
                 messages.error(request, "Operação inválida")
 

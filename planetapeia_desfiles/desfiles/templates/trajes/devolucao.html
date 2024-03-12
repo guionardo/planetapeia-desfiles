@@ -1,0 +1,28 @@
+{% extends "base/bootstrap.html" %}
+{% block content %}
+    <div class="col-lg-8 px-0">
+        <p class="fs-5">Registro de devolução de traje</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <span class="input-group-text">Nome</span>
+                <span class="input-group-text">
+                    {% if manutencao %}
+                        Retorno de manutenção
+                    {% else %}
+                        {{ inventario.pessoa.nome }} ({{ inventario.pessoa.cpf }})
+                    {% endif %}
+                </span>
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Traje</span>
+                <span class="input-group-text">{{ inventario }}</span>
+                <span class="input-group-text">{{ inventario.get_tamanho_display }}</span>
+                <span class="input-group-text">{{ inventario.traje.get_genero_display }}</span>
+            </div>
+            {% include "trajes/checagem.html" %}
+            <hr class="col-6">
+            <button type="submit" class="btn btn-primary">Registrar como recebido por {{ recebedor }}</button>
+        </form>
+    </div>
+{% endblock content %}

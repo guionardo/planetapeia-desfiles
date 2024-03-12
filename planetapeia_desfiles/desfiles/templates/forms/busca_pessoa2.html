@@ -1,0 +1,65 @@
+<div class="input-group mb-3">
+    <input type="text"
+           id="buscaPessoa2Input"
+           class="form-control"
+           placeholder="Nome ou CPF"
+           aria-label="Nome ou CPF">
+    <button class="btn btn-outline-secondary"
+            type="button"
+            id="btnBuscaPessoa2"
+            onclick="buscaPessoaClick2()"
+            title="Buscar pessoa">
+        <i class="bi bi-search"></i>
+    </button>
+</div>
+<div class="input-group mb-3" id="busca2Div">
+    <select class="form-select"
+            aria-label="Default select example"
+            id="selNomes2"
+            name="cpf"></select>
+    <button class="btn btn-primary"
+            type="submit"
+            id="button-select"
+            title="Continuar">
+        <i class="bi bi-arrow-right-circle-fill"></i>
+    </button>
+</div>
+<script>
+    const busca2Div = document.getElementById('busca2Div')
+    const buscaPessoa2Input = document.getElementById('buscaPessoa2Input')
+    const selNomes2 = document.getElementById('selNomes2')
+    var pessoas = {}
+    async function buscaPessoaClick2() {
+        if (!buscaPessoa2Input.value) {
+            alert('Informe um CPF ou o nome da pessoa para buscar')
+            return
+        }
+
+        const nome = encodeURI(buscaPessoa2Input.value)
+        const url = `{% url 'api_busca_pessoa' %}?nome=${nome}`
+
+        const response = await fetch(url)
+        var data = await response.json()
+        pessoas = data
+        if (data.count == 0) {
+            alert('Não encontrei nenhuma pessoa com esse nome!')
+            return
+        }
+
+        selNomes2.innerHTML = ''
+        const selectFirst = document.createElement('option')
+        selectFirst.setAttribute('disabled', '')
+        selectFirst.setAttribute('selected', '')
+        selectFirst.innerHTML = 'Selecione uma pessoa'
+        selNomes2.appendChild(selectFirst)
+
+        for (let i = 0; i < data.count; i++) {
+            const select = document.createElement('option')
+            select.setAttribute('value', data.items[i].cpf)
+            select.innerHTML = data.items[i].nome + (data.items[i].traje_inventario ? ` :${data.items[i].traje_inventario_desc}` : '')
+            selNomes2.appendChild(select)
+        }
+    }
+
+
+</script>

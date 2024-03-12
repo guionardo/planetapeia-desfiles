@@ -6,8 +6,8 @@ from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
 from ...roles import ALMOXARIFE
-from ...services.trajes_service import TrajesService
 from ..utils import NavBar, get_post_data
+from ...services import trajes_service
 
 
 class TrajesEmprestimo(PermissionRequiredMixin, LoginRequiredMixin, TemplateView):
@@ -22,7 +22,7 @@ class TrajesEmprestimo(PermissionRequiredMixin, LoginRequiredMixin, TemplateView
                 traje_inventario,
                 pessoa,
                 inscricao_desfile,
-            ) = TrajesService.validar_entrega_traje(pessoa_id, num_inventario)
+            ) = trajes_service.validar_entrega_traje(pessoa_id, num_inventario)
             context = {
                 "header": "Empréstimo de traje",
                 "navbar": NavBar(request),
@@ -47,13 +47,13 @@ class TrajesEmprestimo(PermissionRequiredMixin, LoginRequiredMixin, TemplateView
             traje_inventario,
             pessoa,
             inscricao_desfile,
-        ) = TrajesService.validar_entrega_traje(pessoa_id, num_inventario)
+        ) = trajes_service.validar_entrega_traje(pessoa_id, num_inventario)
         checklist = [
             (item, request.POST.get(f"check_{index}") is not None)
             for index, item in enumerate(traje_inventario.get_checklist_itens())
         ]
 
-        traje_historico = TrajesService.entregar_traje(
+        traje_historico = trajes_service.entregar_traje(
             traje_inventario, pessoa, request.user, obs, checklist
         )
         messages.success(request, f"{traje_historico}")

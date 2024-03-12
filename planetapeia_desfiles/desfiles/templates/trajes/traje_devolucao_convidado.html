@@ -1,5 +1,13 @@
-<strong>Devolução do traje do convidado</strong> It is shown by default, until the collapse
-plugin adds the appropriate classes that we use to style each element. These classes control the
-overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of
-this with custom CSS or overriding our default variables. It's also worth noting that just about any
-HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="ops" value="traje_devolucao_convidado" />
+    <div class="input-group mb-3">
+        <span class="input-group-text">Inventário #</span>
+        <input type="number"
+               class="form-control"
+               name="inventario"
+               id="INVENTARIO"
+               title="Informe o número do inventário">
+    </div>
+    <button type="submit" class="btn btn-primary">Enviar</button>
+</form>

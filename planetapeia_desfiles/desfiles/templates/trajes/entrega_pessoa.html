@@ -1,0 +1,34 @@
+{% extends "base/bootstrap.html" %}
+{% load cpf_filter %}
+{% block content %}
+    <div class="col-lg-8 px-0">
+        <div class="card">
+            <div class="card-header">Pessoa</div>
+            <div class="card-body">
+                <div class="input-group mb-3">
+                    <span class="input-group-text">CPF</span>
+                    <span class="input-group-text">{{ pessoa.cpf|cpf }}</span>
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Desfile</span>
+                    <span class="input-group-text">{{ inscricao }}</span>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="cpf" value="{{ pessoa.cpf }}" />
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Traje Inventário</span>
+                        <select class="form-select"
+                                aria-label="Default select example"
+                                id="selNomes"
+                                name="inventario">
+                            {% for traje in trajes %}<option value="{{ traje.pk }}">{{ traje }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    {% include "trajes/checagem.html" with checklist_instrucao="Assinale os itens entregues" %}
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

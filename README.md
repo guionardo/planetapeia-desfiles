@@ -4,6 +4,27 @@
 
 Sistema de gestão de desfiles do Planetapéia
 
+## Features do sistema
+
+```mermaid
+mindmap
+    root((Desfila))
+      Administração
+        Veículos
+        Grupos
+        Desfiles
+        Trajes
+            Inventário
+        Convites
+            Validação dos convidados
+      Convidado
+        Convite para desfile
+        Inscrição
+        Perfil
+      Automação
+        Montagem da lista de convidados
+```
+
 ## Fluxos dos Usuários Administrativos
 
 Os usuários administrativos acessarão o sistema pela url ```/admin```
@@ -124,6 +145,7 @@ class TrajeMovimento {
     DEVOLUCAO
     MANUTENCAO
     DESCARTE
+    EXTRAVIO
 }
 
 class TrajeTaxa {
@@ -229,5 +251,27 @@ Pessoa -- Genero
 Pessoa -- TamanhoTraje
 Pessoa -- TipoPessoa
 Pessoa -- TipoCobrancaTrajePessoa
+
+```
+
+## Movimentos dos trajes inventariados
+
+```mermaid
+stateDiagram
+    d: Disponível
+    e: Emprestado
+    m: Em manutenção
+    de: Descarte
+    ex: Extraviado
+    [*] --> d: Entrada
+    d --> e: Empréstimo
+    e --> d: Devolução
+    d --> m: Manutenção
+    m --> d: Devolução
+    d --> de: Descartado
+    de --> [*]
+    d --> ex: Extravio
+    e --> ex: Extravio
+    ex --> [*]
 
 ```

@@ -308,6 +308,14 @@ class Desfile(models.Model):
         default=SituacaoDesfileChoices.ABERTO,
     )
 
+    valor_taxa_traje: decimal.Decimal = models.DecimalField(
+        verbose_name="Taxa do traje",
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        default=decimal.Decimal(0),
+    )
+
     def __str__(self) -> str:
         return f"{self.nome} em {self.local}: {self.data:%d/%m/%Y}"
 
@@ -327,6 +335,13 @@ class Desfile(models.Model):
         elif not self.data_aprovacao:
             self.data_aprovacao = DateTimeProvider.now()
             self.situacao = SituacaoDesfileChoices.CONFIRMADO
+
+        if self.situacao == SituacaoDesfileChoices.ABERTO and self.confirmado:
+            self.situacao = SituacaoDesfileChoices.CONFIRMADO
+
+        if self.valor_taxa_traje == decimal.Decimal(0):
+            if ultimo_desfile := Desfile.objects.order_by("-data").first():
+                self.valor_taxa_traje = ultimo_desfile.valor_taxa_traje
 
         return super().save(*args, **kwargs)
 
@@ -413,14 +428,22 @@ class InscricaoDesfile(models.Model):
     def __str__(self) -> str:
         return f"{self.pessoa} -> {self.desfile} : {self.status_aprovacao()}"
 
-    def status_aprovacao(self) -> str:
+    def status_aprovacao(
+        self, amigavel: bool = False, incluir_desfile: bool = False
+    ) -> str:
         match self.aprovacao:
             case AprovacaoChoices.APROVADO:
-                return f"Aprovado por {self.aprovador}"
+                status = f"✅ Aprovado por {self.aprovador}"
             case AprovacaoChoices.REJEITADO:
-                return f"Rejeitado por {self.aprovador}"
+                status = (
+                    "🙄 Verifique a situação do seu convite com um administrador"
+                    if amigavel
+                    else f"⛔ Rejeitado por {self.aprovador}"
+                )
             case _:
-                return "Aprovação pendente"
+                status = "⏳ Aprovação pendente"
+
+        return f"{status} : {self.desfile}" if incluir_desfile else status
 
 
 class StaffPadrao(models.Model):

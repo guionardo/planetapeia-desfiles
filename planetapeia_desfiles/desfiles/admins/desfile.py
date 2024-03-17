@@ -27,12 +27,21 @@ class DesfileAdmin(admin.ModelAdmin):
             confirmado,
             "situacao",
             "veiculos",
+            "valor_taxa_traje",
         ]
         return fields
 
     def get_readonly_fields(self, request, obj: Desfile):
         if obj and obj.confirmado:
-            return ["nome", "local", "data", "veiculos", "aprovador", "data_aprovacao"]
+            return [
+                "nome",
+                "local",
+                "data",
+                "veiculos",
+                "aprovador",
+                "data_aprovacao",
+                "valor_taxa_traje",
+            ]
         return []
 
     def get_form(self, request: HttpRequest, obj=None, **kwargs):

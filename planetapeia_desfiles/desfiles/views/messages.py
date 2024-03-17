@@ -8,7 +8,7 @@ from ..views.utils import NavBar
 
 
 class MessagesView(LoginRequiredMixin, TemplateView):
-    template_name = "perfil_form.html"
+    template_name = "perfil/perfil_form.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if not (pessoa := request.pessoa):
